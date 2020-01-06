@@ -1,0 +1,111 @@
+<?php
+
+
+namespace Metav\NgPayments\PaymentProviders;
+
+use Metav\NgPayments\Exceptions\InvalidPaymentProviderConfigException;
+use Metav\NgPayments\PaymentProviders\Base\AbstractPaymentProvider;
+use ReflectionClass;
+
+class PaymentProviderFactory
+{
+    protected static $paymentProviders = [
+        'paystack' => Paystack::class,
+        'flutterwave' => Flutterwave::class
+    ];
+
+    public static function getPaymentProvider($paymentProviderConfig = [])
+    {
+        if ($paymentProviderConfig instanceof AbstractPaymentProvider) {
+            return $paymentProviderConfig;
+        }
+
+        if (is_array($paymentProviderConfig)) {
+            return self::getPaymentProviderInstanceFromConfig($paymentProviderConfig);
+        }
+
+        if (is_string($paymentProviderConfig)) {
+            return self::getPaymentProviderInstanceFromConfig(['provider' => strtolower($paymentProviderConfig)]);
+        }
+
+        throw new InvalidPaymentProviderConfigException();
+    }
+
+    protected static function getPaymentProviderInstanceFromConfig($config_array = [])
+    {
+        $config_array = self::getValidConfig($config_array);
+        $provider = $config_array['provider'];
+        $public_key = $config_array['public_key'];
+        $secret_key = $config_array['secret_key'];
+        $app_env = $config_array['app_env'];
+
+        $provider_class = new ReflectionClass(self::$paymentProviders[$provider]);
+        return $provider_class->newInstance($public_key, $secret_key, $app_env);
+    }
+
+    protected static function isValidConfig($config)
+    {
+        if ($config['provider'] == null || $config['app_env'] == null || $config['public_key'] == null
+            || $config['secret_key'] == null) {
+            return false;
+        }
+
+        if (!isset(self::$paymentProviders[$config['provider']])) {
+            return false;
+        }
+
+        return true;
+    }
+
+    protected static function getConstant($constant_name)
+    {
+        return @constant($constant_name) ?? null;
+    }
+
+    protected static function getEnv($param)
+    {
+        $val = @$_ENV[$param] ?? getenv($param);
+        return $val ? $val : null;
+    }
+
+    protected static function getValidConfig($config_array = [])
+    {
+        $config['provider'] = $config_array['provider']
+            ?? self::getConstant("METAV_PAYMENT_PROVIDER")
+            ?? self::getEnv("METAV_PAYMENT_PROVIDER")
+            ?? 'paystack';
+
+        $config['app_env'] = $config_array['app_env']
+            ?? self::getConstant("METAV_APP_ENV")
+            ?? self::getConstant("APP_ENV")
+            ?? self::getEnv("METAV_APP_ENV")
+            ?? self::getEnv("APP_ENV")
+            ?? 'production';
+
+        $provider_public = strtoupper($config['provider']) . "_PUBLIC_KEY";
+        $config['public_key'] = $config_array['public_key']
+            ?? self::getConstant($provider_public)
+            ?? self::getConstant("METAV_" . $provider_public)
+            ?? self::getEnv($provider_public)
+            ?? self::getEnv("METAV_" . $provider_public)
+            ?? self::getConstant("METAV_PUBLIC_KEY")
+            ?? self::getEnv("METAV_PUBLIC_KEY")
+            ?? null;
+
+        $provider_secret = strtoupper($config['provider']) . "_SECRET_KEY";
+        $config['secret_key'] = $config_array['secret_key']
+            ?? self::getConstant($provider_secret)
+            ?? self::getConstant("METAV_" . $provider_secret)
+            ?? self::getEnv($provider_secret)
+            ?? self::getEnv("METAV_" . $provider_secret)
+            ?? self::getConstant("METAV_SECRET_KEY")
+            ?? self::getEnv("METAV_SECRET_KEY")
+            ?? null;
+
+        if (self::isValidConfig($config) == false) {
+            throw new InvalidPaymentProviderConfigException("Required configuration values are not defined");
+        }
+
+        return $config;
+    }
+}
