@@ -1,0 +1,17 @@
+!.gitkeep
+composer.lock
+/vendor/
+/.idea/
+.php_cs.cache
+.phpunit.result.cache
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+/.env
+/tests/_support/_generated/
+/tests/_output/
+/codeception.yml

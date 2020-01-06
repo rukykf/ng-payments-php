@@ -1,0 +1,25 @@
+language: php
+
+php:
+  - '7.1'
+  - '7.2'
+  - '7.3'
+
+cache:
+  directories:
+    - $HOME/.composer/cache/files
+
+before-install:
+  - sudo apt-get update
+  - sudo apt-get install php-curl
+  - composer self-update
+
+install:
+  - composer install --prefer-source --no-interaction --dev
+
+script:
+  - vendor/bin/phpunit --testsuite Unit
+  - vendor/bin/codecept run acceptance,functional
+
+
+

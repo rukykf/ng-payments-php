@@ -1,0 +1,41 @@
+{
+  "name": "metav/ngpayments",
+  "description": "Package for billing and subscribing customers using Nigerian payment gateways (Paystack & Flutterwave)",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Kofi Oghenerukevwe H.",
+      "email": "rukykf@gmail.com"
+    }
+  ],
+
+  "autoload": {
+    "psr-4": {
+      "Metav\\NgPayments\\": "src/"
+    }
+  },
+
+  "require": {
+    "guzzlehttp/guzzle": "^6.5",
+    "vlucas/phpdotenv": "^4.1",
+    "ext-json": "*"
+  },
+
+  "autoload-dev": {
+    "psr-4": {
+      "Metav\\NgPayments\\Tests\\": "tests/"
+    }
+  },
+  "require-dev": {
+    "squizlabs/php_codesniffer": "3.5.3",
+    "friendsofphp/php-cs-fixer": "3.0.x-dev",
+    "codeception/codeception": "^4.0",
+    "codeception/module-asserts": "^1.1",
+    "codeception/module-phpbrowser": "^1.0"
+  },
+
+  "scripts": {
+    "test": "./vendor/bin/codecept run --steps"
+  }
+}
