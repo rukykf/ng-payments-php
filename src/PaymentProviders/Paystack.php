@@ -38,7 +38,10 @@ class Paystack extends AbstractPaymentProvider
         }
 
         if ($amount != null && $response_body['data']['amount'] != $amount) {
-            throw new FailedTransactionException($response_body);
+            throw new FailedTransactionException(
+                $response_body,
+                'The amount paid by the customer does not match the required amount'
+            );
         }
 
         return $status;

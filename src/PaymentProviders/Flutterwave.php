@@ -14,4 +14,24 @@ class Flutterwave extends AbstractPaymentProvider
         $this->baseUrl = "https://api.ravepay.co";
         $this->httpClient = new Client(['base_uri' => $this->baseUrl]);
     }
+
+    public function initializePayment($request_body)
+    {
+        // TODO: Implement initializePayment() method.
+    }
+
+    public function verifyPayment($reference)
+    {
+        // TODO: Implement verifyPayment() method.
+    }
+
+    public function getPaymentPageUrl()
+    {
+        // TODO: Implement getPaymentPageUrl() method.
+    }
+
+    public function getPaymentReference()
+    {
+        // TODO: Implement getPaymentReference() method.
+    }
 }

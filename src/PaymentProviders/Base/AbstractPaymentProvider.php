@@ -73,6 +73,15 @@ abstract class AbstractPaymentProvider
         return $this->httpResponse;
     }
 
+    public function getResponseBody()
+    {
+        if ($this->httpResponse == null) {
+            return null;
+        }
+
+        return $this->httpResponse->getBody();
+    }
+
     public function getResponseBodyAsArray()
     {
         if ($this->httpResponse == null) {
@@ -89,15 +98,6 @@ abstract class AbstractPaymentProvider
         }
 
         return json_decode($this->httpResponse->getBody());
-    }
-
-    public function getResponseBodyAsStream()
-    {
-        if ($this->httpResponse == null) {
-            return null;
-        }
-
-        return $this->httpResponse->getBody();
     }
 
     public function setHttpClient(Client $http_client)
