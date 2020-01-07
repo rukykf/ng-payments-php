@@ -64,7 +64,5 @@ class AttributesTraitTest extends TestCase
         $this->assertEquals('dark', $this->testClass->color_shade);
         $this->assertEquals('customer@email.com', $this->testClass->customer_email);
 
-        $this->expectError();
-        $result = $this->testClass->callbackUrl;
     }
 }
