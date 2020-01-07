@@ -21,7 +21,7 @@ class Paystack extends AbstractPaymentProvider
         $relative_url = '/initialize';
         $request_body = $this->adaptBodyParamsToPaystackAPI($request_body);
         $this->validateRequestBodyHasRequiredParams($request_body, ['email', 'amount']);
-        $request_options = $this->getRequestOptionsForPaystack($request_body);
+        $request_options = $this->getPostRequestOptionsForPaystack($request_body);
         $this->httpResponse = $this->httpClient->post($relative_url, $request_options);
         return $this;
     }
@@ -29,7 +29,7 @@ class Paystack extends AbstractPaymentProvider
     public function verifyPayment($reference, $amount = null)
     {
         $relative_url = '/transaction/verify/' . $reference;
-        $this->httpResponse = $this->httpClient->get($relative_url, $this->getRequestOptionsForPaystack());
+        $this->httpResponse = $this->httpClient->get($relative_url, $this->getPostRequestOptionsForPaystack());
         $response_body = $this->getResponseBodyAsArray();
         $status = $response_body['data']['status'];
 
@@ -57,15 +57,40 @@ class Paystack extends AbstractPaymentProvider
         return @$this->getResponseBodyAsArray()['data']['reference'] ?? '';
     }
 
+    public function savePlan($request_body)
+    {
+        $relative_url = "/plan";
+        $request_body = $this->adaptBodyParamsToPaystackAPI($request_body);
+
+        return $this->createPlan($request_body, $relative_url);
+    }
+
+    public function listPlans($query_params = [])
+    {
+        $relative_url = "/plan";
+        $query_params = $this->adaptBodyParamsToPaystackAPI($query_params);
+        $this->httpResponse = $this->httpClient->get($relative_url, $this->getRequestOptionsForPaystack($query_params));
+        return @$this->getResponseBodyAsArray()['data'] ?? [];
+    }
+
+    public function fetchPlan($plan_id)
+    {
+        $relative_url = "/plan" . "/" . $plan_id;
+        $this->httpResponse = $this->httpClient->get($relative_url, $this->getRequestOptionsForPaystack());
+        return @$this->getResponseBodyAsArray()['data'] ?? [];
+    }
 
     protected function adaptBodyParamsToPaystackAPI($request_body)
     {
         $paystack_params = $this->getPaystackParams();
         $paystack_request_body = $this->adaptBodyParamsToAPI($request_body, $paystack_params);
 
-        //paystack works with amount in kobo and this provider will receive amounts in naira
-        //convert naira to kobo
-        $paystack_request_body['amount'] = $paystack_request_body['amount'] * 100;
+        //paystack works with amount in kobo
+        if (isset($paystack_request_body['naira_amount']) && !isset($paystack_request_body['amount'])) {
+            $paystack_request_body['amount'] = $paystack_request_body['naira_amount'] * 100;
+            unset($paystack_request_body['naira_amount']);
+        }
+
         return $paystack_request_body;
     }
 
@@ -80,7 +105,7 @@ class Paystack extends AbstractPaymentProvider
      * @param $request_body
      * @return array
      */
-    private function getRequestOptionsForPaystack($request_body = []): array
+    private function getPostRequestOptionsForPaystack($request_body = []): array
     {
         return [
             "headers" => [
@@ -90,5 +115,30 @@ class Paystack extends AbstractPaymentProvider
             "http_errors" => $this->httpExceptions,
             "json" => $request_body
         ];
+    }
+
+    private function getRequestOptionsForPaystack($query_params = []): array
+    {
+        return [
+            "headers" => [
+                'authorization' => 'Bearer ' . $this->secretKey,
+            ],
+            "http_errors" => $this->httpExceptions,
+            "query" => $query_params
+        ];
+    }
+
+    /**
+     * @param $request_body
+     * @param string $relative_url
+     * @return int|null
+     * @throws \Metav\NgPayments\Exceptions\InvalidRequestBodyException
+     */
+    private function createPlan($request_body, string $relative_url)
+    {
+        $this->validateRequestBodyHasRequiredParams($request_body, ['name', 'amount', 'interval']);
+        $request_options = $this->getPostRequestOptionsForPaystack($request_body);
+        $this->httpResponse = $this->httpClient->post($relative_url, $request_options);
+        return @$this->getResponseBodyAsArray()['data']['id'] ?? null;
     }
 }

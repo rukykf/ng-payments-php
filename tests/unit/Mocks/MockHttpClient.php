@@ -11,62 +11,68 @@ use GuzzleHttp\Psr7\Response;
 
 class MockHttpClient
 {
-    private $mockHandler = null;
-    private $historyContainer = [];
+    private static $mockHandler = null;
+    private static $historyContainer = [];
 
-    public function getMockHttpClient(array $responses = [])
+    public static function getHttpClient(array $responses = [])
     {
         if (empty($responses)) {
             $responses = [
                 new Response(200)
             ];
         }
-        $this->historyContainer = [];
-        $history = Middleware::history($this->historyContainer);
-        $this->mockHandler = new MockHandler($responses);
-        $handler_stack = HandlerStack::create($this->mockHandler);
+        $history = Middleware::history(self::$historyContainer);
+        self::$mockHandler = new MockHandler($responses);
+        $handler_stack = HandlerStack::create(self::$mockHandler);
         $handler_stack->push($history);
         return new Client(['handler' => $handler_stack]);
     }
 
-    public function getMockHandler()
+    public static function getMockHandler()
     {
-        return $this->mockHandler;
+        return self::$mockHandler;
     }
 
-    public function resetMockHandler()
+    public static function resetMockHandler()
     {
-        $this->mockHandler->reset();
+        self::$mockHandler->reset();
     }
 
-    public function appendResponsesToMockHttpClient(array $responses)
+    public static function resetHttpTransactionHistory()
     {
-        $this->mockHandler->append($responses);
+        self::$historyContainer = [];
     }
 
-    public function getHttpTransactionHistory(): array
+    public static function appendResponsesToMockHttpClient(array $responses)
     {
-        return $this->historyContainer;
-    }
-
-    public function getRecentHttpTransaction()
-    {
-        $index = count($this->historyContainer) - 1;
-        if ($index < 0) {
-            return [];
-        } else {
-            return $this->historyContainer[$index];
+        foreach ($responses as $response) {
+            self::$mockHandler->append($response);
         }
     }
 
-    public function getRecentRequest()
+    public static function getHttpTransactionHistory(): array
     {
-        return @$this->getRecentHttpTransaction()['request'];
+        return self::$historyContainer;
     }
 
-    public function getRecentRequestBody()
+    public static function getRecentHttpTransaction()
     {
-        $request = $this->getRecentRequest();
+        $index = count(self::$historyContainer) - 1;
+        if ($index < 0) {
+            return [];
+        } else {
+            return self::$historyContainer[$index];
+        }
+    }
+
+    public static function getRecentRequest()
+    {
+        return @self::getRecentHttpTransaction()['request'];
+    }
+
+    public static function getRecentRequestBody()
+    {
+        $request = self::getRecentRequest();
         if ($request == null) {
             return [];
         }
@@ -74,14 +80,14 @@ class MockHttpClient
         return json_decode($request->getBody(), true);
     }
 
-    public function getRecentResponse()
+    public static function getRecentResponse()
     {
-        return @$this->getRecentHttpTransaction()['response'];
+        return @self::getRecentHttpTransaction()['response'];
     }
 
-    public function getRecentResponseBody()
+    public static function getRecentResponseBody()
     {
-        $response = $this->getRecentResponse();
+        $response = self::getRecentResponse();
         if ($response == null) {
             return [];
         }

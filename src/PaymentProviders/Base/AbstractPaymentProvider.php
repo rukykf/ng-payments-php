@@ -146,6 +146,10 @@ abstract class AbstractPaymentProvider
 
     protected function adaptBodyParamsToAPI($request_body, $api_params)
     {
+        if (empty($request_body)) {
+            return $request_body;
+        }
+
         $api_request_body = [];
         foreach ($request_body as $param => $value) {
             if (isset($api_params[$param])) {

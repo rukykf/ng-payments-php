@@ -7,7 +7,7 @@ use GuzzleHttp\Psr7\Response;
 
 class MockPaystackApiResponse
 {
-    public static function getInitializePaymentSuccessResponse()
+    public static function getSuccessfulInitializePaymentResponse()
     {
         $response_body = [
             "status" => true,
@@ -21,7 +21,7 @@ class MockPaystackApiResponse
         return new Response(200, [], json_encode($response_body));
     }
 
-    public static function getSuccessfulPaymentVerificationResponse()
+    public static function getSuccessfulVerifyPaymentResponse()
     {
         $response_body = [
             "status" => true,
@@ -100,7 +100,7 @@ class MockPaystackApiResponse
         return new Response(200, [], json_encode($response_body));
     }
 
-    public static function getFailedPaymentVerificationResponse()
+    public static function getFailedVerifyPaymentResponse()
     {
         $response_body = [
             "status" => true,
@@ -176,6 +176,115 @@ class MockPaystackApiResponse
                 "subaccount" => []
             ]
 
+        ];
+        return new Response(200, [], json_encode($response_body));
+    }
+
+    public static function getSuccessfulCreatePlanResponse()
+    {
+        $response_body = [
+            "status" => true,
+            "message" => "Plan created",
+            "data" => [
+                "name" => "Monthly retainer",
+                "interval" => "monthly",
+                "amount" => 500000,
+                "integration" => 402187,
+                "domain" => "test",
+                "currency" => "NGN",
+                "plan_code" => "plan_code",
+                "invoice_limit" => 0,
+                "send_invoices" => true,
+                "send_sms" => true,
+                "hosted_page" => false,
+                "migrate" => false,
+                "id" => 37425,
+                "createdAt" => "2020-01-07T11:55:40.076Z",
+                "updatedAt" => "2020-01-07T11:55:40.076Z"
+            ]
+        ];
+        return new Response(200, [], json_encode($response_body));
+    }
+
+    public static function getSuccessfulListPlansResponse()
+    {
+        $response_body = [
+            "status" => true,
+            "message" => "Plans retrieved",
+            "data" => [
+                [
+                    "subscriptions" => [],
+                    "name" => "Monthly retainer",
+                    "interval" => "monthly",
+                    "amount" => 500000,
+                    "integration" => 402187,
+                    "domain" => "test",
+                    "currency" => "NGN",
+                    "plan_code" => "plan_code",
+                    "description" => null,
+                    "invoice_limit" => 0,
+                    "send_invoices" => true,
+                    "send_sms" => true,
+                    "hosted_page" => false,
+                    "hosted_page_url" => null,
+                    "hosted_page_summary" => null,
+                    "migrate" => false,
+                    "id" => 37425,
+                    "createdAt" => "2020-01-07T11:55:40.076Z",
+                    "updatedAt" => "2020-01-07T11:55:40.076Z"
+                ],
+                [
+                    "subscriptions" => [
+                        [
+                            "customer" => 63,
+                            "plan" => 27,
+                            "integration" => 100032,
+                            "domain" => "test",
+                            "start" => 1458505748,
+                            "status" => "complete",
+                            "quantity" => 1,
+                            "amount" => 100000,
+                            "subscription_code" => "SUB_birvokwpp0sftun",
+                            "email_token" => "9y62mxp4uh25das",
+                            "authorization" => 79,
+                            "easy_cron_id" => null,
+                            "cron_expression" => "0 0 * * 0",
+                            "next_payment_date" => "2016-03-27T07:00:00.000Z",
+                            "open_invoice" => null,
+                            "id" => 8,
+                            "createdAt" => "2016-03-20T20:29:08.000Z",
+                            "updatedAt" => "2016-03-22T16:23:52.000Z"
+                        ]
+                    ],
+                    "name" => "Monthly retainer",
+                    "interval" => "monthly",
+                    "amount" => 500000,
+                    "integration" => 402187,
+                    "domain" => "test",
+                    "currency" => "NGN",
+                    "plan_code" => "plan_code",
+                    "description" => null,
+                    "invoice_limit" => 0,
+                    "send_invoices" => true,
+                    "send_sms" => true,
+                    "hosted_page" => false,
+                    "hosted_page_url" => null,
+                    "hosted_page_summary" => null,
+                    "migrate" => false,
+                    "id" => 37425,
+                    "createdAt" => "2020-01-07T11:55:40.076Z",
+                    "updatedAt" => "2020-01-07T11:55:40.076Z"
+                ]
+            ]
+        ];
+        return new Response(200, [], json_encode($response_body));
+    }
+
+    public static function getSuccessfulUpdatePlanResponse()
+    {
+        $response_body = [
+            "status" => true,
+            "message" => "Plan updated. 1 subscription(s) affected"
         ];
         return new Response(200, [], json_encode($response_body));
     }

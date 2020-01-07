@@ -7,7 +7,7 @@ trait AttributesTrait
 {
     protected $attributes = [];
 
-    public function withAttributes(array $attributes)
+    public function setAttributes(array $attributes)
     {
         $this->attributes = $attributes;
         return $this;
@@ -18,7 +18,7 @@ trait AttributesTrait
         return $this->attributes;
     }
 
-    public function with($attribute, $value)
+    public function set($attribute, $value)
     {
         $this->attributes[$attribute] = $value;
         return $this;
@@ -26,12 +26,25 @@ trait AttributesTrait
 
     public function __call($method, $args)
     {
-        if ((strpos($method, 'with') === 0) && ($method !== 'with')) {
-            $name = substr($method, 4);
+        if ((strpos($method, 'set') === 0) && ($method !== 'with')) {
+            $name = substr($method, 3);
             $name = $this->convertToCase($name, @$args[1] ?? 'snake_case');
-            return $this->with($name, $args[0]);
+            return $this->set($name, $args[0]);
         }
         throw new \BadMethodCallException('Call to undefined function: ' . get_class($this) . '::' . $method);
+    }
+
+    public function __get($attribute)
+    {
+        if (array_key_exists($attribute, $this->attributes)) {
+            return $this->attributes[$attribute];
+        }
+        trigger_error("Property $attribute doesn't exist and cannot be obtained", E_USER_ERROR);
+    }
+
+    public function __set($attribute, $value)
+    {
+        $this->attributes[$attribute] = $value;
     }
 
     protected function convertToCase($input, $case)
