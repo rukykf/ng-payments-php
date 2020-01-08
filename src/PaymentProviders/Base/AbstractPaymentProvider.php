@@ -85,7 +85,7 @@ abstract class AbstractPaymentProvider
     public function getResponseBodyAsArray()
     {
         if ($this->httpResponse == null) {
-            return null;
+            return [];
         }
 
         return json_decode($this->httpResponse->getBody(), true);
@@ -136,7 +136,7 @@ abstract class AbstractPaymentProvider
     protected function validateRequestBodyHasRequiredParams($request_body, $required_params)
     {
         foreach ($required_params as $param) {
-            if (!array_key_exists($param, $request_body)) {
+            if (!array_key_exists($param, $request_body) || @$request_body[$param] === null) {
                 throw new InvalidRequestBodyException($param . " is a required parameter for this request");
             }
         }

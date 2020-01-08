@@ -41,7 +41,7 @@ class PaystackTest extends TestCase
         MockHttpClient::appendResponsesToMockHttpClient([new Response(200)]);
         $this->paystack->initializePayment([
             'customer_email' => 'customer@example.com', //paystack expects email not customer_email as the param
-            'amount' => 3000 //amount in naira should be converted to kobo
+            'amount' => 3000
         ]);
         $sent_request_body = MockHttpClient::getRecentRequestBody();
         $this->assertEquals(3000, $sent_request_body['amount']);
@@ -123,6 +123,7 @@ class PaystackTest extends TestCase
 
     public function testSavePlan()
     {
+        //test create
         $this->paystack->setHttpClient(MockHttpClient::getHttpClient([
             MockPaystackApiResponse::getSuccessfulCreatePlanResponse()
         ]));
@@ -134,6 +135,16 @@ class PaystackTest extends TestCase
         $plan_id = $this->paystack->savePlan(["name" => "Mock Plan", "amount" => 30000, "interval" => "weekly"]);
         $this->assertNull($plan_id);
 
+        //test update
+        MockHttpClient::appendResponsesToMockHttpClient([MockPaystackApiResponse::getSuccessfulUpdatePlanResponse()]);
+        $plan_id = $this->paystack->savePlan(["id" => 'plan_id', "name" => "Mock Plan"]);
+        $this->assertEquals("plan_id", $plan_id);
+
+        MockHttpClient::appendResponsesToMockHttpClient([new Response(404)]);
+        $plan_id = $this->paystack->savePlan(["id" => 'plan_id', "name" => "Mock Plan"]);
+        $this->assertNull($plan_id);
+
+        //test invalid request
         $this->expectException(InvalidRequestBodyException::class);
         $plan_id = $this->paystack->savePlan(["name" => "Mock Plan", "amount" => 30000]);
     }
@@ -146,5 +157,102 @@ class PaystackTest extends TestCase
 
         $plans = $this->paystack->listPlans();
         $this->assertEquals(2, count($plans));
+
+        MockHttpClient::appendResponsesToMockHttpClient([new Response(404)]);
+        $plans = $this->paystack->listPlans();
+        $this->assertEquals([], $plans);
+
+        $this->paystack->enableHttpExceptions();
+        $this->expectException(BadResponseException::class);
+        MockHttpClient::appendResponsesToMockHttpClient([new Response(404)]);
+        $plan = $this->paystack->listPlans();
+    }
+
+    public function testFetchPlan()
+    {
+        $this->paystack->setHttpClient(MockHttpClient::getHttpClient([
+            MockPaystackApiResponse::getSuccessfulFetchPlanResponse()
+        ]));
+
+        $plan = $this->paystack->fetchPlan("plan_code");
+        $this->assertEquals(50000, $plan['amount']);
+
+        MockHttpClient::appendResponsesToMockHttpClient([new Response(404)]);
+        $plan = $this->paystack->fetchPlan("plan_code");
+        $this->assertEquals([], $plan);
+
+        $this->paystack->enableHttpExceptions();
+        $this->expectException(BadResponseException::class);
+        MockHttpClient::appendResponsesToMockHttpClient([new Response(404)]);
+        $plan = $this->paystack->fetchPlan("plan_code");
+    }
+
+    public function testSaveSubAccount()
+    {
+        //test create
+        $this->paystack->setHttpClient(MockHttpClient::getHttpClient([
+            MockPaystackApiResponse::getSuccessfulCreateSubAccountResponse()
+        ]));
+        $subaccount_id = $this->paystack->saveSubAccount([
+            "business_name" => "mock business",
+            "settlement_bank" => "mock bank",
+            "account_number" => "000000000",
+            "percentage_charge" => 3
+        ]);
+        $this->assertEquals(55, $subaccount_id);
+
+        MockHttpClient::appendResponsesToMockHttpClient([new Response(404)]);
+        $subaccount_id = $this->paystack->saveSubAccount([
+            "business_name" => "mock business",
+            "settlement_bank" => "mock bank",
+            "account_number" => "000000000",
+            "percentage_charge" => 3
+        ]);
+        $this->assertEquals(null, $subaccount_id);
+
+        //test update
+        MockHttpClient::appendResponsesToMockHttpClient([MockPaystackApiResponse::getSuccessfulUpdatePlanResponse()]);
+        $subaccount_id = $this->paystack->saveSubAccount(["id" => "subaccount_id"]);
+        $this->assertEquals("subaccount_id", $subaccount_id);
+
+        MockHttpClient::appendResponsesToMockHttpClient([new Response(404)]);
+        $subaccount_id = $this->paystack->saveSubAccount(["id" => "subaccount_id"]);
+        $this->assertNull($subaccount_id);
+
+        //test invalid request
+        $this->expectException(InvalidRequestBodyException::class);
+        $this->paystack->saveSubAccount(["settlement_bank" => "mock bank"]);
+    }
+
+    public function testListSubAccounts()
+    {
+        $this->paystack->setHttpClient(MockHttpClient::getHttpClient([
+            MockPaystackApiResponse::getSuccessfulListSubAccountsResponse()
+        ]));
+        $subaccounts = $this->paystack->listSubAccounts();
+        $this->assertEquals(3, count($subaccounts));
+
+        MockHttpClient::appendResponsesToMockHttpClient([new Response(404)]);
+        $subaccounts = $this->paystack->listSubAccounts();
+        $this->assertEquals([], $subaccounts);
+
+        $this->expectException(BadResponseException::class);
+        $this->paystack->enableHttpExceptions();
+        MockHttpClient::appendResponsesToMockHttpClient([new Response(404)]);
+        $subaccounts = $this->paystack->listSubAccounts();
+    }
+
+    public function testFetchSubAccount()
+    {
+        $this->paystack->setHttpClient(MockHttpClient::getHttpClient([
+            MockPaystackApiResponse::getSuccessfulFetchSubAccountResponse()
+        ]));
+        $subaccount = $this->paystack->fetchSubAccount("subaccount_id");
+        $this->assertEquals(55, $subaccount['id']);
+
+        MockHttpClient::appendResponsesToMockHttpClient([new Response(404)]);
+        $subaccount = $this->paystack->fetchSubAccount("subaccount_id");
+        $this->assertEquals([], $subaccount);
+
     }
 }

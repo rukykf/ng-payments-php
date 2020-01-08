@@ -63,6 +63,5 @@ class AttributesTraitTest extends TestCase
         $this->testClass->setAttributes(['color_shade' => 'dark', 'customer_email' => 'customer@email.com']);
         $this->assertEquals('dark', $this->testClass->color_shade);
         $this->assertEquals('customer@email.com', $this->testClass->customer_email);
-
     }
 }

@@ -35,7 +35,7 @@ class Plan
     {
         $plans_data = PaymentProviderFactory::getPaymentProvider()->listPlans($query_params);
         $plans = [];
-        if ($plans_data = []) {
+        if ($plans_data == []) {
             return $plans_data;
         }
         foreach ($plans_data as $plan_data) {
@@ -48,6 +48,6 @@ class Plan
     public static function fetch($plan_id)
     {
         $plan_details = PaymentProviderFactory::getPaymentProvider()->fetchPlan($plan_id);
-        return (new Plan())->setAttributes($plan_details);
+        return new Plan($plan_details);
     }
 }

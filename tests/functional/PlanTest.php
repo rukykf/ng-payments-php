@@ -28,6 +28,30 @@ class PlanTest extends TestCase
         $plan->save();
     }
 
+    public function testUpdatePlan()
+    {
+        $plan = new Plan("Test Plan", 3000, "weekly");
+        $plan_id = $plan->save();
+        $this->assertNotNull($plan_id);
+
+        $fetched_plan = Plan::fetch($plan_id);
+        $this->assertEquals(true, $fetched_plan->send_sms);
+        $this->assertEquals(true, $fetched_plan->send_invoices);
+
+        $plan->send_sms = false;
+        $plan->send_invoices = false;
+        $plan->save();
+
+        $fetched_plan = Plan::fetch($plan_id);
+        $this->assertEquals(false, $fetched_plan->send_sms);
+        $this->assertEquals(false, $fetched_plan->send_invoices);
+
+        $plan = new Plan();
+        $plan->plan_code = "UNKNOWN_CODE";
+        $this->assertNull($plan->save());
+
+    }
+
     public function testFetchPlan()
     {
         $plan = new Plan("Test Plan", 3000, "weekly");
@@ -47,6 +71,7 @@ class PlanTest extends TestCase
         $this->assertNotNull($plans);
         $this->assertContainsOnlyInstancesOf(Plan::class, $plans);
     }
+
 
 
 }
