@@ -1,6 +1,6 @@
 <?php
 
-namespace Metav\NgPayments\Tests\Unit\PaymentProviders;
+namespace Metav\NgPayments\Tests\unit\PaymentProviders;
 
 use Metav\NgPayments\Exceptions\InvalidPaymentProviderConfigException;
 use Metav\NgPayments\PaymentProviders\Base\AbstractPaymentProvider;
