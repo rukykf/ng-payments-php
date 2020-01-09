@@ -10,7 +10,7 @@ class PlanTest extends TestCase
 {
     public function testPlanConstructorOverload()
     {
-        $attributes = ["color" => "blue", "shade" => "grey"];
+        $attributes = ["name" => "plan_name", "naira_amount" => 3000, "interval" => "weekly"];
 
         $plan = new Plan($attributes);
         $this->assertEquals($attributes, $plan->getAttributes());

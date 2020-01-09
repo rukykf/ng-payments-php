@@ -17,12 +17,11 @@ class Plan
         $this->paymentProvider = PaymentProviderFactory::getPaymentProvider();
         if (func_num_args() == 1 && is_array(func_get_arg(0))) {
             $this->attributes = func_get_arg(0);
-            return;
+        }else{
+            $this->attributes["name"] = $plan_name;
+            $this->attributes["naira_amount"] = $amount_in_naira;
+            $this->attributes["interval"] = $plan_interval;
         }
-
-        $this->attributes["name"] = $plan_name;
-        $this->attributes["naira_amount"] = $amount_in_naira;
-        $this->attributes["interval"] = $plan_interval;
     }
 
     public function save()

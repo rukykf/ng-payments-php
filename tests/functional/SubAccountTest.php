@@ -10,7 +10,12 @@ class SubAccountTest extends TestCase
 {
     public function testSubAccountConstructorOverload()
     {
-        $attributes = ["color" => "blue", "shade" => "grey"];
+        $attributes = [
+            "business_name" => "test business",
+            "settlement_bank" => "a bank",
+            "account_number" => "000000000",
+            "percentage_charge" => 3
+        ];
 
         $subaccount = new SubAccount($attributes);
         $this->assertEquals($attributes, $subaccount->getAttributes());
@@ -60,7 +65,8 @@ class SubAccountTest extends TestCase
         $this->assertContainsOnlyInstancesOf(SubAccount::class, $subaccounts);
     }
 
-    public function testFetchSubAccount(){
+    public function testFetchSubAccount()
+    {
         $subaccount = new SubAccount("Test Business", "Zenith Bank", '0000000000', 3);
         $subaccount_code = $subaccount->save();
 

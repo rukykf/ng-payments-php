@@ -21,12 +21,12 @@ class SubAccount
         $this->paymentProvider = PaymentProviderFactory::getPaymentProvider();
         if (func_num_args() == 1 && is_array(func_get_arg(0))) {
             $this->attributes = func_get_arg(0);
-            return;
+        } else {
+            $this->attributes['business_name'] = $business_name;
+            $this->attributes['settlement_bank'] = $settlement_bank;
+            $this->attributes['account_number'] = $account_number;
+            $this->attributes['percentage_charge'] = $percentage_charge;
         }
-        $this->attributes['business_name'] = $business_name;
-        $this->attributes['settlement_bank'] = $settlement_bank;
-        $this->attributes['account_number'] = $account_number;
-        $this->attributes['percentage_charge'] = $percentage_charge;
     }
 
     public function save()
