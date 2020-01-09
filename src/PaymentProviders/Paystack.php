@@ -4,6 +4,8 @@
 namespace Metav\NgPayments\PaymentProviders;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Psr7\Request;
 use Metav\NgPayments\Exceptions\FailedTransactionException;
 use Metav\NgPayments\PaymentProviders\Base\AbstractPaymentProvider;
 
@@ -26,25 +28,36 @@ class Paystack extends AbstractPaymentProvider
         return $this;
     }
 
-    public function verifyPayment($reference, $amount = null)
+    public function isPaymentValid($reference, $naira_amount)
     {
         $relative_url = '/transaction/verify/' . $reference;
-        $this->httpResponse = $this->httpClient->get($relative_url, $this->getPostRequestOptionsForPaystack());
+        $request = new Request('GET', $this->baseUrl . $relative_url, [
+            'authorization' => 'Bearer ' . $this->secretKey,
+        ]);
+        $this->httpResponse = $this->httpClient->send($request, ["http_errors" => $this->httpExceptions]);
+
         $response_body = $this->getResponseBodyAsArray();
-        $status = $response_body['data']['status'];
+        $status = @$response_body['data']['status'];
+        $expected_payment_amount = $naira_amount * 100;
+        $amount_paid = @$response_body['data']['amount'];
 
         if ($this->transactionExceptions == true && $status != 'success') {
-            throw new FailedTransactionException($response_body);
+            throw new FailedTransactionException($request, $this->httpResponse);
         }
 
-        if ($amount != null && $response_body['data']['amount'] != $amount) {
+
+        if ($this->transactionExceptions == true && $amount_paid != $expected_payment_amount) {
             throw new FailedTransactionException(
-                $response_body,
-                'The amount paid by the customer does not match the required amount'
+                $request,
+                $this->httpResponse
             );
         }
 
-        return $status;
+        if ($status == 'success' && $amount_paid == $expected_payment_amount) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public function getPaymentPageUrl()
@@ -55,6 +68,11 @@ class Paystack extends AbstractPaymentProvider
     public function getPaymentReference()
     {
         return @$this->getResponseBodyAsArray()['data']['reference'] ?? '';
+    }
+
+    public function getAuthorizationCode()
+    {
+        return @$this->getResponseBodyAsArray()['data']['authorization']['authorization_code'] ?? '';
     }
 
     public function savePlan($request_body)
@@ -70,7 +88,7 @@ class Paystack extends AbstractPaymentProvider
         }
     }
 
-    public function listPlans($query_params = [])
+    public function fetchAllPlans($query_params = [])
     {
         $relative_url = "/plan";
         $query_params = $this->adaptBodyParamsToPaystackAPI($query_params);
@@ -98,7 +116,7 @@ class Paystack extends AbstractPaymentProvider
         }
     }
 
-    public function listSubAccounts($query_params = [])
+    public function fetchAllSubAccounts($query_params = [])
     {
         $relative_url = "/subaccount";
         $query_params = $this->adaptBodyParamsToPaystackAPI($query_params);
@@ -188,7 +206,7 @@ class Paystack extends AbstractPaymentProvider
         $request_options = $this->getPostRequestOptionsForPaystack($request_body);
         $this->httpResponse = $this->httpClient->put($relative_url, $request_options);
 
-        if ($this->getResponseBodyAsArray()["status"] == true) {
+        if (@$this->getResponseBodyAsArray()["status"] == true) {
             return $plan_id;
         }
         return null;
@@ -216,7 +234,7 @@ class Paystack extends AbstractPaymentProvider
         $relative_url .= "/" . $subaccount_id;
         $request_options = $this->getPostRequestOptionsForPaystack($request_body);
         $this->httpResponse = $this->httpClient->put($relative_url, $request_options);
-        if ($this->getResponseBodyAsArray()["status"] == true) {
+        if (@$this->getResponseBodyAsArray()["status"] == true) {
             return $subaccount_id;
         }
         return null;

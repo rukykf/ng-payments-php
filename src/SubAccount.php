@@ -35,9 +35,9 @@ class SubAccount
         return $this->id;
     }
 
-    public static function list($query_params = null)
+    public static function fetchAll($query_params = null)
     {
-        $subaccounts_data = PaymentProviderFactory::getPaymentProvider()->listSubAccounts($query_params);
+        $subaccounts_data = PaymentProviderFactory::getPaymentProvider()->fetchAllSubAccounts($query_params);
         $subaccounts = [];
         if ($subaccounts_data == []) {
             return $subaccounts_data;

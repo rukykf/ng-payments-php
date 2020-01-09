@@ -61,13 +61,13 @@ class PlanTest extends TestCase
         $this->assertEquals('Test Plan', $fetched_plan->name);
     }
 
-    public function testListPlan()
+    public function testFetchAllPlans()
     {
         //to ensure there's at least one plan in the least
         $plan = new Plan("Test Plan", 3000, "weekly");
         $plan_id = $plan->save();
 
-        $plans = Plan::list();
+        $plans = Plan::fetchAll();
         $this->assertNotNull($plans);
         $this->assertContainsOnlyInstancesOf(Plan::class, $plans);
     }

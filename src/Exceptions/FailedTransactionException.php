@@ -3,26 +3,24 @@
 
 namespace Metav\NgPayments\Exceptions;
 
-use Exception;
+use GuzzleHttp\Exception\BadResponseException;
 
-class FailedTransactionException extends Exception
+class FailedTransactionException extends BadResponseException
 {
-    private $responseBody;
-
     public function __construct(
-        array $response_body,
+        $httpRequest,
+        $httpResponse,
         string $message = "Transaction Failed. Check Response Body for details"
     ) {
-        parent::__construct($message);
-        $this->responseBody = $response_body;
+        parent::__construct($message, $httpRequest, $httpResponse);
     }
 
     /**
      * @return array
      */
-    public function getResponseBody()
+    public function getResponseBodyArray()
     {
-        return $this->responseBody;
+        return json_decode($this->getResponse()->getBody(), true);
     }
 
 }

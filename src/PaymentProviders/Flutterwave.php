@@ -20,7 +20,7 @@ class Flutterwave extends AbstractPaymentProvider
         // TODO: Implement initializePayment() method.
     }
 
-    public function verifyPayment($reference)
+    public function isPaymentValid($reference, $naira_amount)
     {
         // TODO: Implement verifyPayment() method.
     }

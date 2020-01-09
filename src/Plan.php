@@ -31,9 +31,9 @@ class Plan
         return $this->id;
     }
 
-    public static function list($query_params = null)
+    public static function fetchAll($query_params = null)
     {
-        $plans_data = PaymentProviderFactory::getPaymentProvider()->listPlans($query_params);
+        $plans_data = PaymentProviderFactory::getPaymentProvider()->fetchAllPlans($query_params);
         $plans = [];
         if ($plans_data == []) {
             return $plans_data;

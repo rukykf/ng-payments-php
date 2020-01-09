@@ -50,12 +50,12 @@ class SubAccountTest extends TestCase
         $this->assertNull($subaccount->save());
     }
 
-    public function testListSubAccount()
+    public function testFetchAllSubAccounts()
     {
         $subaccount = new SubAccount("Test Business", "Zenith Bank", '0000000000', 3);
         $subaccount_id = $subaccount->save();
 
-        $subaccounts = SubAccount::list();
+        $subaccounts = SubAccount::fetchAll();
         $this->assertNotNull($subaccounts);
         $this->assertContainsOnlyInstancesOf(SubAccount::class, $subaccounts);
     }

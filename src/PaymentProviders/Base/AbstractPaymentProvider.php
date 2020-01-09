@@ -88,7 +88,7 @@ abstract class AbstractPaymentProvider
             return [];
         }
 
-        return json_decode($this->httpResponse->getBody(), true);
+        return json_decode($this->httpResponse->getBody(), true) ?? [];
     }
 
     public function getResponseBodyAsObject()
@@ -127,7 +127,7 @@ abstract class AbstractPaymentProvider
 
     abstract public function initializePayment($request_body);
 
-    abstract public function verifyPayment($reference);
+    abstract public function isPaymentValid($reference, $naira_amount);
 
     abstract public function getPaymentPageUrl();
 
