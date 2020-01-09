@@ -19,8 +19,8 @@ class SubAccountTest extends TestCase
     public function testCreateSubAccount()
     {
         $subaccount = new SubAccount("Test Business", "Zenith Bank", '0000000000', 3);
-        $subaccount_id = $subaccount->save();
-        $this->assertNotNull($subaccount_id);
+        $subaccount_code = $subaccount->save();
+        $this->assertNotNull($subaccount_code);
 
         $this->expectException(InvalidRequestBodyException::class);
         $sub = new SubAccount();
@@ -30,18 +30,18 @@ class SubAccountTest extends TestCase
     public function testUpdateSubAccount()
     {
         $subaccount = new SubAccount("Test Business", "Zenith Bank", '0000000000', 3);
-        $subaccount_id = $subaccount->save();
-        $this->assertNotNull($subaccount_id);
+        $subaccount_code = $subaccount->save();
+        $this->assertNotNull($subaccount_code);
 
-        $fetched_subaccount = SubAccount::fetch($subaccount_id);
+        $fetched_subaccount = SubAccount::fetch($subaccount_code);
         $this->assertNull($fetched_subaccount->primary_contact_email);
         $this->assertNull($fetched_subaccount->primary_contact_name);
-        $this->assertEquals($subaccount_id, $fetched_subaccount->id);
+        $this->assertEquals($subaccount_code, $fetched_subaccount->subaccount_code);
 
         $fetched_subaccount->primary_contact_email = "contact@email.com";
         $fetched_subaccount->primary_contact_name = "Contact Name";
         $fetched_subaccount->save();
-        $fetched_subaccount = SubAccount::fetch($subaccount_id);
+        $fetched_subaccount = SubAccount::fetch($subaccount_code);
         $this->assertEquals("contact@email.com", $fetched_subaccount->primary_contact_email);
         $this->assertEquals("Contact Name", $fetched_subaccount->primary_contact_name);
 
@@ -53,7 +53,7 @@ class SubAccountTest extends TestCase
     public function testFetchAllSubAccounts()
     {
         $subaccount = new SubAccount("Test Business", "Zenith Bank", '0000000000', 3);
-        $subaccount_id = $subaccount->save();
+        $subaccount_code = $subaccount->save();
 
         $subaccounts = SubAccount::fetchAll();
         $this->assertNotNull($subaccounts);
@@ -62,9 +62,9 @@ class SubAccountTest extends TestCase
 
     public function testFetchSubAccount(){
         $subaccount = new SubAccount("Test Business", "Zenith Bank", '0000000000', 3);
-        $subaccount_id = $subaccount->save();
+        $subaccount_code = $subaccount->save();
 
-        $subaccount = SubAccount::fetch($subaccount_id);
+        $subaccount = SubAccount::fetch($subaccount_code);
         $this->assertEquals("Zenith Bank", $subaccount->settlement_bank);
     }
 }

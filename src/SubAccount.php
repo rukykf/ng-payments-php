@@ -31,8 +31,8 @@ class SubAccount
 
     public function save()
     {
-        $this->id = $this->paymentProvider->saveSubAccount($this->attributes);
-        return $this->id;
+        $this->subaccount_code = $this->paymentProvider->saveSubAccount($this->attributes);
+        return $this->subaccount_code;
     }
 
     public static function fetchAll($query_params = null)

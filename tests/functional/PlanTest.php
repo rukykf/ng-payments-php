@@ -31,10 +31,10 @@ class PlanTest extends TestCase
     public function testUpdatePlan()
     {
         $plan = new Plan("Test Plan", 3000, "weekly");
-        $plan_id = $plan->save();
-        $this->assertNotNull($plan_id);
+        $plan_code = $plan->save();
+        $this->assertNotNull($plan_code);
 
-        $fetched_plan = Plan::fetch($plan_id);
+        $fetched_plan = Plan::fetch($plan_code);
         $this->assertEquals(true, $fetched_plan->send_sms);
         $this->assertEquals(true, $fetched_plan->send_invoices);
 
@@ -42,7 +42,7 @@ class PlanTest extends TestCase
         $plan->send_invoices = false;
         $plan->save();
 
-        $fetched_plan = Plan::fetch($plan_id);
+        $fetched_plan = Plan::fetch($plan_code);
         $this->assertEquals(false, $fetched_plan->send_sms);
         $this->assertEquals(false, $fetched_plan->send_invoices);
 
@@ -55,8 +55,8 @@ class PlanTest extends TestCase
     public function testFetchPlan()
     {
         $plan = new Plan("Test Plan", 3000, "weekly");
-        $plan_id = $plan->save();
-        $fetched_plan = Plan::fetch($plan_id);
+        $plan_code = $plan->save();
+        $fetched_plan = Plan::fetch($plan_code);
         $this->assertEquals('300000', $fetched_plan->amount);
         $this->assertEquals('Test Plan', $fetched_plan->name);
     }
@@ -65,7 +65,7 @@ class PlanTest extends TestCase
     {
         //to ensure there's at least one plan in the least
         $plan = new Plan("Test Plan", 3000, "weekly");
-        $plan_id = $plan->save();
+        $plan_code = $plan->save();
 
         $plans = Plan::fetchAll();
         $this->assertNotNull($plans);

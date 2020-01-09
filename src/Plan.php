@@ -27,8 +27,8 @@ class Plan
 
     public function save()
     {
-        $this->id = $this->paymentProvider->savePlan($this->attributes);
-        return $this->id;
+        $this->plan_code = $this->paymentProvider->savePlan($this->attributes);
+        return $this->plan_code;
     }
 
     public static function fetchAll($query_params = null)

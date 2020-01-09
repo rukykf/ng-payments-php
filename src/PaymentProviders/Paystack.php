@@ -203,7 +203,7 @@ class Paystack extends AbstractPaymentProvider
         $this->validateRequestBodyHasRequiredParams($request_body, ['name', 'amount', 'interval']);
         $request_options = $this->getPostRequestOptionsForPaystack($request_body);
         $this->httpResponse = $this->httpClient->post($relative_url, $request_options);
-        return @$this->getResponseBodyAsArray()['data']['id'] ?? null;
+        return @$this->getResponseBodyAsArray()['data']['plan_code'] ?? null;
     }
 
     /**
@@ -232,7 +232,7 @@ class Paystack extends AbstractPaymentProvider
         );
         $request_options = $this->getPostRequestOptionsForPaystack($request_body);
         $this->httpResponse = $this->httpClient->post($relative_url, $request_options);
-        return @$this->getResponseBodyAsArray()['data']['id'] ?? null;
+        return @$this->getResponseBodyAsArray()['data']['subaccount_code'] ?? null;
     }
 
     /**
