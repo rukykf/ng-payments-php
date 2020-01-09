@@ -4,7 +4,6 @@
 namespace Metav\NgPayments\PaymentProviders;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Psr7\Request;
 use Metav\NgPayments\Exceptions\FailedTransactionException;
 use Metav\NgPayments\PaymentProviders\Base\AbstractPaymentProvider;
@@ -31,10 +30,8 @@ class Paystack extends AbstractPaymentProvider
     public function isPaymentValid($reference, $naira_amount)
     {
         $relative_url = '/transaction/verify/' . $reference;
-        $request = new Request('GET', $this->baseUrl . $relative_url, [
-            'authorization' => 'Bearer ' . $this->secretKey,
-        ]);
-        $this->httpResponse = $this->httpClient->send($request, ["http_errors" => $this->httpExceptions]);
+        $request = new Request('GET', $this->baseUrl . $relative_url);
+        $this->httpResponse = $this->httpClient->send($request, $this->getRequestOptionsForPaystack());
 
         $response_body = $this->getResponseBodyAsArray();
         $status = @$response_body['data']['status'];
@@ -45,12 +42,8 @@ class Paystack extends AbstractPaymentProvider
             throw new FailedTransactionException($request, $this->httpResponse);
         }
 
-
         if ($this->transactionExceptions == true && $amount_paid != $expected_payment_amount) {
-            throw new FailedTransactionException(
-                $request,
-                $this->httpResponse
-            );
+            throw new FailedTransactionException($request, $this->httpResponse);
         }
 
         if ($status == 'success' && $amount_paid == $expected_payment_amount) {
@@ -58,6 +51,25 @@ class Paystack extends AbstractPaymentProvider
         } else {
             return false;
         }
+    }
+
+    public function chargeAuth($request_body)
+    {
+        $relative_url = "/transaction/charge_authorization";
+        $request_body = $this->adaptBodyParamsToPaystackAPI($request_body);
+        $this->validateRequestBodyHasRequiredParams($request_body, ['email', 'amount', 'authorization_code']);
+        $request = new Request('POST', $this->baseUrl . $relative_url);
+        $this->httpResponse = $this->httpClient->send($request, $this->getPostRequestOptionsForPaystack($request_body));
+
+        $status = @$this->getResponseBodyAsArray()['data']['status'];
+        if ($this->transactionExceptions == true && $status != 'success') {
+            throw new FailedTransactionException($request, $this->httpResponse);
+        }
+
+        if ($status == 'success') {
+            return $this->getPaymentReference();
+        }
+        return null;
     }
 
     public function getPaymentPageUrl()
@@ -239,5 +251,4 @@ class Paystack extends AbstractPaymentProvider
         }
         return null;
     }
-
 }

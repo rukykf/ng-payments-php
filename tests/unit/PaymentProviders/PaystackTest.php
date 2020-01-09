@@ -129,13 +129,50 @@ class PaystackTest extends TestCase
         $this->paystack->isPaymentValid('mock_reference', 5000);
     }
 
-    public function testIsPaymentValidThrowsFailedTransactionExceptionWithWrongAmount(){
+    public function testIsPaymentValidThrowsFailedTransactionExceptionWithWrongAmount()
+    {
         $this->paystack->setHttpClient(MockHttpClient::getHttpClient([
             MockPaystackApiResponse::getSuccessfulVerifyPaymentResponse()
         ]));
 
         $this->expectException(FailedTransactionException::class);
         $this->paystack->isPaymentValid('mock_reference', 2000);
+    }
+
+    public function testChargeAuth()
+    {
+        $this->paystack->setHttpClient(MockHttpClient::getHttpClient([
+            MockPaystackApiResponse::getSuccessfulChargeAuthResponse(),
+            MockPaystackApiResponse::getFailedChargeAuthResponse(),
+            MockPaystackApiResponse::getFailedChargeAuthResponse()
+        ]));
+
+        //without exceptions
+        $this->paystack->disableTransactionExceptions();
+
+        //success
+        $reference = $this->paystack->chargeAuth([
+            'email' => 'customer@email.com',
+            'amount' => 30000,
+            'authorization_code' => 'mock_authorization_code'
+        ]);
+        $this->assertEquals('mock_reference', $reference);
+
+        //failed
+        $reference = $this->paystack->chargeAuth([
+            'email' => 'customer@email.com',
+            'amount' => 30000,
+            'authorization_code' => 'mock_authorization_code'
+        ]);
+        $this->assertNull($reference);
+
+        $this->paystack->enableTransactionExceptions();
+        $this->expectException(FailedTransactionException::class);
+        $reference = $this->paystack->chargeAuth([
+            'email' => 'customer@email.com',
+            'amount' => 30000,
+            'authorization_code' => 'mock_authorization_code'
+        ]);
     }
 
     public function testGetAuthorizationCode()

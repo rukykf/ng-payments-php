@@ -18,7 +18,7 @@ class FailedTransactionException extends BadResponseException
     /**
      * @return array
      */
-    public function getResponseBodyArray()
+    public function getResponseBody()
     {
         return json_decode($this->getResponse()->getBody(), true);
     }

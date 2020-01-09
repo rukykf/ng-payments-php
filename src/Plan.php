@@ -34,10 +34,11 @@ class Plan
     public static function fetchAll($query_params = null)
     {
         $plans_data = PaymentProviderFactory::getPaymentProvider()->fetchAllPlans($query_params);
-        $plans = [];
         if ($plans_data == []) {
             return $plans_data;
         }
+
+        $plans = [];
         foreach ($plans_data as $plan_data) {
             $plans[] = new Plan($plan_data);
         }

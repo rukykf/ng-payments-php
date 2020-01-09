@@ -180,6 +180,110 @@ class MockPaystackApiResponse
         return new Response(200, [], json_encode($response_body));
     }
 
+    public static function getSuccessfulChargeAuthResponse()
+    {
+        $response_body = [
+            'status' => true,
+            'message' => 'Charge attempted',
+            'data' =>
+                [
+                    'amount' => 500000,
+                    'currency' => 'NGN',
+                    'transaction_date' => '2020-01-09T19:47:03.000Z',
+                    'status' => 'success',
+                    'reference' => 'mock_reference',
+                    'domain' => 'test',
+                    'metadata' => '',
+                    'gateway_response' => 'Approved',
+                    'message' => null,
+                    'channel' => 'card',
+                    'ip_address' => null,
+                    'log' => null,
+                    'fees' => 17500,
+                    'authorization' =>
+                        [
+                            'authorization_code' => 'mock_authorization_code',
+                            'bin' => '408408',
+                            'last4' => '4081',
+                            'exp_month' => '12',
+                            'exp_year' => '2020',
+                            'channel' => 'card',
+                            'card_type' => 'visa DEBIT',
+                            'bank' => 'Test Bank',
+                            'country_code' => 'NG',
+                            'brand' => 'visa',
+                            'reusable' => true,
+                            'signature' => 'SIG_zj7IDkk4xJv7kckHZJLu',
+                        ],
+                    'customer' =>
+                        [
+                            'id' => 18454980,
+                            'first_name' => null,
+                            'last_name' => null,
+                            'email' => 'customer@email.com',
+                            'customer_code' => 'CUS_3nszoamue6jy3qy',
+                            'phone' => null,
+                            'metadata' => null,
+                            'risk_action' => 'deny',
+                        ],
+                    'plan' => 0,
+                ],
+        ];
+        return new Response(200, [], json_encode($response_body));
+    }
+
+    public static function getFailedChargeAuthResponse()
+    {
+        $response_body = [
+            'status' => true,
+            'message' => 'Charge attempted',
+            'data' =>
+                [
+                    'amount' => 500000,
+                    'currency' => 'NGN',
+                    'transaction_date' => '2020-01-09T19:47:03.000Z',
+                    'status' => 'failed',
+                    'reference' => 'mock_reference',
+                    'domain' => 'test',
+                    'metadata' => '',
+                    'gateway_response' => 'Insufficient funds',
+                    'message' => null,
+                    'channel' => 'card',
+                    'ip_address' => null,
+                    'log' => null,
+                    'fees' => 17500,
+                    'authorization' =>
+                        [
+                            'authorization_code' => 'mock_authorization_code',
+                            'bin' => '408408',
+                            'last4' => '4081',
+                            'exp_month' => '12',
+                            'exp_year' => '2020',
+                            'channel' => 'card',
+                            'card_type' => 'visa DEBIT',
+                            'bank' => 'Test Bank',
+                            'country_code' => 'NG',
+                            'brand' => 'visa',
+                            'reusable' => true,
+                            'signature' => 'SIG_zj7IDkk4xJv7kckHZJLu',
+                        ],
+                    'customer' =>
+                        [
+                            'id' => 18454980,
+                            'first_name' => null,
+                            'last_name' => null,
+                            'email' => 'customer@email.com',
+                            'customer_code' => 'CUS_3nszoamue6jy3qy',
+                            'phone' => null,
+                            'metadata' => null,
+                            'risk_action' => 'deny',
+                        ],
+                    'plan' => 0,
+                ],
+        ];
+        return new Response(200, [], json_encode($response_body));
+    }
+
     public static function getSuccessfulCreatePlanResponse()
     {
         $response_body = [
