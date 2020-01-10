@@ -34,7 +34,7 @@ class Plan implements ApiDataMapperInterface
     public static function fetchAll($query_params = null)
     {
         $plans_data = PaymentProviderFactory::getPaymentProvider()->fetchAllPlans($query_params);
-        if ($plans_data == []) {
+        if ($plans_data == null) {
             return $plans_data;
         }
 
@@ -49,6 +49,9 @@ class Plan implements ApiDataMapperInterface
     public static function fetch($plan_id)
     {
         $plan_details = PaymentProviderFactory::getPaymentProvider()->fetchPlan($plan_id);
+        if ($plan_details == null) {
+            return $plan_details;
+        }
         return new Plan($plan_details);
     }
 

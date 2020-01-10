@@ -40,7 +40,7 @@ class SubAccount implements ApiDataMapperInterface
     {
         $subaccounts_data = PaymentProviderFactory::getPaymentProvider()->fetchAllSubAccounts($query_params);
         $subaccounts = [];
-        if ($subaccounts_data == []) {
+        if ($subaccounts_data == null) {
             return $subaccounts_data;
         }
         foreach ($subaccounts_data as $subaccount_data) {
@@ -53,6 +53,11 @@ class SubAccount implements ApiDataMapperInterface
     public static function fetch($subaccount_id)
     {
         $subaccount_details = PaymentProviderFactory::getPaymentProvider()->fetchSubAccount($subaccount_id);
+
+        if ($subaccount_details == null) {
+            return $subaccount_details;
+        }
+
         return new SubAccount($subaccount_details);
     }
 

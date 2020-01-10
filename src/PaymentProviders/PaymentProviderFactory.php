@@ -126,8 +126,7 @@ class PaymentProviderFactory
             ?? self::getEnv($provider_public)
             ?? self::getEnv("METAV_" . $provider_public)
             ?? self::getConstant("METAV_PUBLIC_KEY")
-            ?? self::getEnv("METAV_PUBLIC_KEY")
-            ?? null;
+            ?? self::getEnv("METAV_PUBLIC_KEY");
 
         $provider_secret = strtoupper($config['provider']) . "_SECRET_KEY";
         $config['secret_key'] = $config_array['secret_key']
@@ -137,8 +136,7 @@ class PaymentProviderFactory
             ?? self::getEnv($provider_secret)
             ?? self::getEnv("METAV_" . $provider_secret)
             ?? self::getConstant("METAV_SECRET_KEY")
-            ?? self::getEnv("METAV_SECRET_KEY")
-            ?? null;
+            ?? self::getEnv("METAV_SECRET_KEY");
 
         if (self::isValidConfig($config) == false) {
             throw new InvalidPaymentProviderConfigException("Required configuration values are not defined");

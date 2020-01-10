@@ -60,6 +60,10 @@ class PlanTest extends TestCase
         $fetched_plan = Plan::fetch($plan_code);
         $this->assertEquals('300000', $fetched_plan->amount);
         $this->assertEquals('Test Plan', $fetched_plan->name);
+
+        $fetched_plan = Plan::fetch("Invalid Plan");
+        $this->assertNull($fetched_plan);
+
     }
 
     public function testFetchAllPlans()

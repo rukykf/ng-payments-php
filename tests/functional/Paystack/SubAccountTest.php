@@ -58,6 +58,7 @@ class SubAccountTest extends TestCase
 
     public function testFetchAllSubAccounts()
     {
+        //to ensure there's at least one subaccount
         $subaccount = new SubAccount("Test Business", "Zenith Bank", '0000000000', 3);
         $subaccount_code = $subaccount->save();
 
@@ -73,6 +74,9 @@ class SubAccountTest extends TestCase
 
         $subaccount = SubAccount::fetch($subaccount_code);
         $this->assertEquals("Zenith Bank", $subaccount->settlement_bank);
+
+        $subaccount = SubAccount::fetch("Invalid Subaccount");
+        $this->assertNull($subaccount);
     }
 
     public function testDeleteSubAccount()

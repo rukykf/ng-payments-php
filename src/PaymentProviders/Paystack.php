@@ -28,10 +28,7 @@ class Paystack extends AbstractPaymentProvider
         $this->validateRequestBodyHasRequiredParams($request_body, ['email', 'amount']);
         $request_options = $this->getPostRequestOptionsForPaystack($request_body);
         $this->httpResponse = $this->httpClient->post($relative_url, $request_options);
-        if (@$this->getResponseBodyAsArray()['status'] == true) {
-            return $this->getPaymentReference();
-        }
-        return null;
+        return $this->getPaymentReference();
     }
 
     public function isPaymentValid($reference, $naira_amount)
@@ -55,9 +52,9 @@ class Paystack extends AbstractPaymentProvider
 
         if ($status == 'success' && $amount_paid == $expected_payment_amount) {
             return true;
-        } else {
-            return false;
         }
+
+        return false;
     }
 
     public function chargeAuth($request_body)
@@ -84,17 +81,17 @@ class Paystack extends AbstractPaymentProvider
 
     public function getPaymentPageUrl()
     {
-        return @$this->getResponseBodyAsArray()['data']['authorization_url'] ?? '';
+        return @$this->getResponseBodyAsArray()['data']['authorization_url'];
     }
 
     public function getPaymentReference()
     {
-        return @$this->getResponseBodyAsArray()['data']['reference'] ?? '';
+        return @$this->getResponseBodyAsArray()['data']['reference'];
     }
 
     public function getPaymentAuthorizationCode()
     {
-        return @$this->getResponseBodyAsArray()['data']['authorization']['authorization_code'] ?? '';
+        return @$this->getResponseBodyAsArray()['data']['authorization']['authorization_code'];
     }
 
     public function savePlan($request_body)
@@ -102,7 +99,7 @@ class Paystack extends AbstractPaymentProvider
         $relative_url = "/plan";
         $request_body = $this->adaptBodyParamsToPaystackAPI($request_body);
 
-        $plan_id = @$request_body['id'] ?? @$request_body['plan_code'] ?? null;
+        $plan_id = @$request_body['id'] ?? @$request_body['plan_code'];
         if ($plan_id == null) {
             return $this->createPlan($request_body, $relative_url);
         } else {
@@ -115,14 +112,14 @@ class Paystack extends AbstractPaymentProvider
         $relative_url = "/plan";
         $query_params = $this->adaptBodyParamsToPaystackAPI($query_params);
         $this->httpResponse = $this->httpClient->get($relative_url, $this->getRequestOptionsForPaystack($query_params));
-        return @$this->getResponseBodyAsArray()['data'] ?? [];
+        return @$this->getResponseBodyAsArray()['data'];
     }
 
     public function fetchPlan($plan_id)
     {
         $relative_url = "/plan" . "/" . $plan_id;
         $this->httpResponse = $this->httpClient->get($relative_url, $this->getRequestOptionsForPaystack());
-        return @$this->getResponseBodyAsArray()['data'] ?? [];
+        return @$this->getResponseBodyAsArray()['data'];
     }
 
     public function deletePlan($plan_id)
@@ -135,7 +132,7 @@ class Paystack extends AbstractPaymentProvider
         $relative_url = "/subaccount";
         $request_body = $this->adaptBodyParamsToPaystackAPI($request_body);
 
-        $subaccount_id = @$request_body['id'] ?? @$request_body['subaccount_code'] ?? null;
+        $subaccount_id = @$request_body['id'] ?? @$request_body['subaccount_code'];
         if ($subaccount_id == null) {
             return $this->createSubAccount($request_body, $relative_url);
         } else {
@@ -148,14 +145,14 @@ class Paystack extends AbstractPaymentProvider
         $relative_url = "/subaccount";
         $query_params = $this->adaptBodyParamsToPaystackAPI($query_params);
         $this->httpResponse = $this->httpClient->get($relative_url, $this->getRequestOptionsForPaystack($query_params));
-        return @$this->getResponseBodyAsArray()['data'] ?? [];
+        return @$this->getResponseBodyAsArray()['data'];
     }
 
     public function fetchSubAccount($subaccount_id)
     {
         $relative_url = "/subaccount" . "/" . $subaccount_id;
         $this->httpResponse = $this->httpClient->get($relative_url, $this->getRequestOptionsForPaystack());
-        return @$this->getResponseBodyAsArray()['data'] ?? [];
+        return @$this->getResponseBodyAsArray()['data'];
     }
 
     public function deleteSubAccount($subaccount_id)
@@ -231,7 +228,7 @@ class Paystack extends AbstractPaymentProvider
         $this->validateRequestBodyHasRequiredParams($request_body, ['name', 'amount', 'interval']);
         $request_options = $this->getPostRequestOptionsForPaystack($request_body);
         $this->httpResponse = $this->httpClient->post($relative_url, $request_options);
-        return @$this->getResponseBodyAsArray()['data']['plan_code'] ?? null;
+        return @$this->getResponseBodyAsArray()['data']['plan_code'];
     }
 
     /**
@@ -260,7 +257,7 @@ class Paystack extends AbstractPaymentProvider
         );
         $request_options = $this->getPostRequestOptionsForPaystack($request_body);
         $this->httpResponse = $this->httpClient->post($relative_url, $request_options);
-        return @$this->getResponseBodyAsArray()['data']['subaccount_code'] ?? null;
+        return @$this->getResponseBodyAsArray()['data']['subaccount_code'];
     }
 
     /**

@@ -3,7 +3,6 @@
 
 namespace Metav\NgPayments\Exceptions;
 
-
 use BadMethodCallException;
 
 class FeatureNotSupportedException extends BadMethodCallException
