@@ -12,7 +12,6 @@ class AuthBillTest extends TestCase
     public function testCharge()
     {
         $bill = new AuthBill("AUTH_CODE", "customer@email.com", 3000);
-
         $payment_provider = &$bill->getPaymentProvider();
         $payment_provider->disableTransactionExceptions();
         $reference = $bill->charge();
@@ -28,7 +27,6 @@ class AuthBillTest extends TestCase
         $plan = new Plan("Test Plan", 4000, "daily");
         $plan->save();
         $bill = new AuthBill("AUTH_CODE", "customer@email.com", 5000);
-
         $payment_provider = &$bill->getPaymentProvider();
         $payment_provider->disableTransactionExceptions();
         $reference = $bill->subscribe($plan->plan_code);

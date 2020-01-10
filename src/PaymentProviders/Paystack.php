@@ -22,7 +22,7 @@ class Paystack extends AbstractPaymentProvider
         $relative_url = '/transaction/initialize';
         $request_body = $this->adaptBodyParamsToPaystackAPI(
             $request_body,
-            $this->getPaystackInitializeEndpointParams()
+            $this->getPaystackTransactionEndpointParams()
         );
         $this->validateRequestBodyHasRequiredParams($request_body, ['email', 'amount']);
         $request_options = $this->getPostRequestOptionsForPaystack($request_body);
@@ -62,7 +62,10 @@ class Paystack extends AbstractPaymentProvider
     public function chargeAuth($request_body)
     {
         $relative_url = "/transaction/charge_authorization";
-        $request_body = $this->adaptBodyParamsToPaystackAPI($request_body);
+        $request_body = $this->adaptBodyParamsToPaystackAPI(
+            $request_body,
+            $this->getPaystackTransactionEndpointParams()
+        );
         $this->validateRequestBodyHasRequiredParams($request_body, ['email', 'amount', 'authorization_code']);
         $request = new Request('POST', $this->baseUrl . $relative_url);
         $this->httpResponse = $this->httpClient->send($request, $this->getPostRequestOptionsForPaystack($request_body));
@@ -172,7 +175,7 @@ class Paystack extends AbstractPaymentProvider
         ];
     }
 
-    private function getPaystackInitializeEndpointParams()
+    private function getPaystackTransactionEndpointParams()
     {
         return [
             "subaccount_code" => "subaccount",
