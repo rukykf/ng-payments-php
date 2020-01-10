@@ -39,4 +39,9 @@ class Flutterwave extends AbstractPaymentProvider
     {
         // TODO: Implement getPaymentAuthorizationCode() method.
     }
+
+    public function chargeAuth($request_body)
+    {
+        // TODO: Implement chargeAuth() method.
+    }
 }
