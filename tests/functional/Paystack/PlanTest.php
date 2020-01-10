@@ -63,7 +63,7 @@ class PlanTest extends TestCase
 
     public function testFetchAllPlans()
     {
-        //to ensure there's at least one plan in the least
+        //to ensure there's at least one plan in the list
         $plan = new Plan("Test Plan", 3000, "weekly");
         $plan_code = $plan->save();
 
