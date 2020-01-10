@@ -19,12 +19,18 @@ class Paystack extends AbstractPaymentProvider
 
     public function initializePayment($request_body)
     {
-        $relative_url = '/initialize';
-        $request_body = $this->adaptBodyParamsToPaystackAPI($request_body);
+        $relative_url = '/transaction/initialize';
+        $request_body = $this->adaptBodyParamsToPaystackAPI(
+            $request_body,
+            $this->getPaystackInitializeEndpointParams()
+        );
         $this->validateRequestBodyHasRequiredParams($request_body, ['email', 'amount']);
         $request_options = $this->getPostRequestOptionsForPaystack($request_body);
         $this->httpResponse = $this->httpClient->post($relative_url, $request_options);
-        return $this;
+        if (@$this->getResponseBodyAsArray()['status'] == true) {
+            return $this->getPaymentReference();
+        }
+        return null;
     }
 
     public function isPaymentValid($reference, $naira_amount)
@@ -82,7 +88,7 @@ class Paystack extends AbstractPaymentProvider
         return @$this->getResponseBodyAsArray()['data']['reference'] ?? '';
     }
 
-    public function getAuthorizationCode()
+    public function getPaymentAuthorizationCode()
     {
         return @$this->getResponseBodyAsArray()['data']['authorization']['authorization_code'] ?? '';
     }
@@ -144,10 +150,11 @@ class Paystack extends AbstractPaymentProvider
     }
 
 
-    protected function adaptBodyParamsToPaystackAPI($request_body)
+    protected function adaptBodyParamsToPaystackAPI($request_body, $paystack_endpoint_params = [])
     {
         $paystack_params = $this->getPaystackParams();
         $paystack_request_body = $this->adaptBodyParamsToAPI($request_body, $paystack_params);
+        $paystack_request_body = $this->adaptBodyParamsToAPI($paystack_request_body, $paystack_endpoint_params);
 
         //paystack works with amount in kobo
         if (isset($paystack_request_body['naira_amount']) && !isset($paystack_request_body['amount'])) {
@@ -162,6 +169,14 @@ class Paystack extends AbstractPaymentProvider
     {
         return [
             "customer_email" => "email"
+        ];
+    }
+
+    private function getPaystackInitializeEndpointParams()
+    {
+        return [
+            "subaccount_code" => "subaccount",
+            "plan_code" => "plan"
         ];
     }
 

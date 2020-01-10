@@ -1,6 +1,6 @@
 <?php
 
-namespace Metav\NgPayments\Tests\Traits;
+namespace Metav\NgPayments\Tests\unit\Traits;
 
 use Metav\NgPayments\Traits\AttributesTrait;
 use PHPUnit\Framework\TestCase;

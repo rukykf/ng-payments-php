@@ -4,6 +4,7 @@
 namespace Metav\NgPayments\PaymentProviders\Base;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Psr7\Request;
 use Metav\NgPayments\Exceptions\InvalidRequestBodyException;
 
 abstract class AbstractPaymentProvider
@@ -125,13 +126,23 @@ abstract class AbstractPaymentProvider
         $this->transactionExceptions = false;
     }
 
+    public function sendRequest(Request $request, $options = [])
+    {
+        $this->httpResponse = $this->httpClient->send($request, $options);
+        return $this->httpResponse;
+    }
+
     abstract public function initializePayment($request_body);
 
     abstract public function isPaymentValid($reference, $naira_amount);
 
+    abstract public function chargeAuth($request_body);
+
     abstract public function getPaymentPageUrl();
 
     abstract public function getPaymentReference();
+
+    abstract public function getPaymentAuthorizationCode();
 
     protected function validateRequestBodyHasRequiredParams($request_body, $required_params)
     {

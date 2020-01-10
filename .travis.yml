@@ -19,7 +19,6 @@ install:
 
 script:
   - vendor/bin/phpunit --testsuite Unit
-  - vendor/bin/codecept run acceptance,functional
 
 
 

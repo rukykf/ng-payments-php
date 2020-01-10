@@ -14,7 +14,7 @@ class PaymentProviderFactory
         'flutterwave' => Flutterwave::class
     ];
 
-    public static function getPaymentProvider($paymentProviderConfig = [])
+    public static function getPaymentProvider($paymentProviderConfig = []) : AbstractPaymentProvider
     {
         if ($paymentProviderConfig instanceof AbstractPaymentProvider) {
             return $paymentProviderConfig;
