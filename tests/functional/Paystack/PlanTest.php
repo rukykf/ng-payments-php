@@ -1,6 +1,6 @@
 <?php
 
-namespace Metav\NgPayments\Tests\functional;
+namespace Metav\NgPayments\Tests\functional\Paystack;
 
 use Metav\NgPayments\Exceptions\InvalidRequestBodyException;
 use Metav\NgPayments\Plan;

@@ -8,9 +8,9 @@ use Metav\NgPayments\PaymentProviders\Base\AbstractPaymentProvider;
 
 class Flutterwave extends AbstractPaymentProvider
 {
-    public function __construct($public_key, $secret_key, $app_env)
+    public function __construct($public_key, $secret_key, $app_env, $error_config = [])
     {
-        parent::__construct($public_key, $secret_key, $app_env);
+        parent::__construct($public_key, $secret_key, $app_env, $error_config);
         $this->baseUrl = "https://api.ravepay.co";
         $this->httpClient = new Client(['base_uri' => $this->baseUrl]);
     }

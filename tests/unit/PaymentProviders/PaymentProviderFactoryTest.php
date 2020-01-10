@@ -59,6 +59,16 @@ class PaymentProviderFactoryTest extends TestCase
         $this->assertInstanceOf(AbstractPaymentProvider::class, $payment_provider);
     }
 
+    public function testGetPaymentProviderLoadsConfigFromCachedConfig()
+    {
+        PaymentProviderFactory::setPaymentProviderConfig([
+            'public_key' => 'public',
+            'secret_key' => 'secret'
+        ]);
+        $payment_provider = PaymentProviderFactory::getPaymentProvider('paystack');
+        $this->assertInstanceOf(AbstractPaymentProvider::class, $payment_provider);
+    }
+
     public function testGetPaymentProviderPrioritizesProviderSpecificConfig()
     {
         define('METAV_PUBLIC_KEY', 'public');

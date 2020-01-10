@@ -79,7 +79,7 @@ class Bill
     /**
      * @return PaymentProviders\Base\AbstractPaymentProvider
      */
-    public function getPaymentProvider(): PaymentProviders\Base\AbstractPaymentProvider
+    public function &getPaymentProvider(): PaymentProviders\Base\AbstractPaymentProvider
     {
         return $this->paymentProvider;
     }

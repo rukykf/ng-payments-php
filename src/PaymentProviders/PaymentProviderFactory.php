@@ -9,12 +9,18 @@ use ReflectionClass;
 
 class PaymentProviderFactory
 {
+    protected static $cachedConfig = [];
+
+    protected static $httpExceptions = false;
+
+    protected static $transactionExceptions = true;
+
     protected static $paymentProviders = [
         'paystack' => Paystack::class,
         'flutterwave' => Flutterwave::class
     ];
 
-    public static function getPaymentProvider($paymentProviderConfig = []) : AbstractPaymentProvider
+    public static function getPaymentProvider($paymentProviderConfig = []): AbstractPaymentProvider
     {
         if ($paymentProviderConfig instanceof AbstractPaymentProvider) {
             return $paymentProviderConfig;
@@ -31,6 +37,31 @@ class PaymentProviderFactory
         throw new InvalidPaymentProviderConfigException();
     }
 
+    public static function enableHttpExceptions()
+    {
+        self::$httpExceptions = true;
+    }
+
+    public static function disableHttpExceptions()
+    {
+        self::$httpExceptions = false;
+    }
+
+    public static function enableTransactionExceptions()
+    {
+        self::$transactionExceptions = true;
+    }
+
+    public static function disableTransactionExceptions()
+    {
+        self::$transactionExceptions = false;
+    }
+
+    public static function setPaymentProviderConfig(array $config)
+    {
+        self::$cachedConfig = $config;
+    }
+
     protected static function getPaymentProviderInstanceFromConfig($config_array = [])
     {
         $config_array = self::getValidConfig($config_array);
@@ -38,9 +69,12 @@ class PaymentProviderFactory
         $public_key = $config_array['public_key'];
         $secret_key = $config_array['secret_key'];
         $app_env = $config_array['app_env'];
-
+        $error_config = [
+            "http_exceptions" => self::$httpExceptions,
+            "transaction_exceptions" => self::$transactionExceptions
+        ];
         $provider_class = new ReflectionClass(self::$paymentProviders[$provider]);
-        return $provider_class->newInstance($public_key, $secret_key, $app_env);
+        return $provider_class->newInstance($public_key, $secret_key, $app_env, $error_config);
     }
 
     protected static function isValidConfig($config)
@@ -71,11 +105,13 @@ class PaymentProviderFactory
     protected static function getValidConfig($config_array = [])
     {
         $config['provider'] = $config_array['provider']
+            ?? self::$cachedConfig['provider']
             ?? self::getConstant("METAV_PAYMENT_PROVIDER")
             ?? self::getEnv("METAV_PAYMENT_PROVIDER")
             ?? 'paystack';
 
         $config['app_env'] = $config_array['app_env']
+            ?? self::$cachedConfig['app_env']
             ?? self::getConstant("METAV_APP_ENV")
             ?? self::getConstant("APP_ENV")
             ?? self::getEnv("METAV_APP_ENV")
@@ -84,6 +120,7 @@ class PaymentProviderFactory
 
         $provider_public = strtoupper($config['provider']) . "_PUBLIC_KEY";
         $config['public_key'] = $config_array['public_key']
+            ?? self::$cachedConfig['public_key']
             ?? self::getConstant($provider_public)
             ?? self::getConstant("METAV_" . $provider_public)
             ?? self::getEnv($provider_public)
@@ -94,6 +131,7 @@ class PaymentProviderFactory
 
         $provider_secret = strtoupper($config['provider']) . "_SECRET_KEY";
         $config['secret_key'] = $config_array['secret_key']
+            ?? self::$cachedConfig['secret_key']
             ?? self::getConstant($provider_secret)
             ?? self::getConstant("METAV_" . $provider_secret)
             ?? self::getEnv($provider_secret)

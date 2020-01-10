@@ -18,12 +18,14 @@ abstract class AbstractPaymentProvider
     protected $httpExceptions = false;
     protected $transactionExceptions = true;
 
-    public function __construct($public_key, $secret_key, $app_env)
+    public function __construct($public_key, $secret_key, $app_env, $error_config = [])
     {
         $this->publicKey = $public_key;
         $this->secretKey = $secret_key;
         $this->appEnv = $app_env;
         $this->httpClient = new Client();
+        $this->httpExceptions = @$error_config["http_exceptions"] ?? false;
+        $this->transactionExceptions = @$error_config["transaction_exceptions"] ?? true;
     }
 
     /**
