@@ -16,3 +16,4 @@ composer.lock
 /tests/_output/
 /codeception.yml
 /.travis.acceptance.yml
+/phpunit.xml

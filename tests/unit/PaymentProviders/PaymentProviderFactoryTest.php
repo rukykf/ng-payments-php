@@ -16,6 +16,7 @@ use PHPUnit\Framework\TestCase;
  */
 class PaymentProviderFactoryTest extends TestCase
 {
+
     public function testGetPaymentProviderLoadsConfigFromConstants()
     {
         //define constants
@@ -88,4 +89,3 @@ class PaymentProviderFactoryTest extends TestCase
         $payment_provider = PaymentProviderFactory::getPaymentProvider('provider');
     }
 }
-
