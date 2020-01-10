@@ -2,6 +2,7 @@
 
 namespace Metav\NgPayments\Tests\functional\Paystack;
 
+use Metav\NgPayments\Exceptions\FeatureNotSupportedException;
 use Metav\NgPayments\Exceptions\InvalidRequestBodyException;
 use Metav\NgPayments\SubAccount;
 use PHPUnit\Framework\TestCase;
@@ -72,5 +73,13 @@ class SubAccountTest extends TestCase
 
         $subaccount = SubAccount::fetch($subaccount_code);
         $this->assertEquals("Zenith Bank", $subaccount->settlement_bank);
+    }
+
+    public function testDeleteSubAccount()
+    {
+        $subaccount = new SubAccount("Test Business", "Zenith Bank", '0000000000', 3);
+        $subaccount_code = $subaccount->save();
+        $this->expectException(FeatureNotSupportedException::class);
+        SubAccount::delete($subaccount_code);
     }
 }

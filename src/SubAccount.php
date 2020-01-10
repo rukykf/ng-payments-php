@@ -3,10 +3,11 @@
 
 namespace Metav\NgPayments;
 
+use Metav\NgPayments\Interfaces\ApiDataMapperInterface;
 use Metav\NgPayments\PaymentProviders\PaymentProviderFactory;
 use Metav\NgPayments\Traits\AttributesTrait;
 
-class SubAccount
+class SubAccount implements ApiDataMapperInterface
 {
     use AttributesTrait;
 
@@ -53,5 +54,10 @@ class SubAccount
     {
         $subaccount_details = PaymentProviderFactory::getPaymentProvider()->fetchSubAccount($subaccount_id);
         return new SubAccount($subaccount_details);
+    }
+
+    public static function delete($subaccount_id)
+    {
+        return PaymentProviderFactory::getPaymentProvider()->deleteSubAccount($subaccount_id);
     }
 }

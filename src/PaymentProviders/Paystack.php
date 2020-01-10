@@ -6,6 +6,7 @@ namespace Metav\NgPayments\PaymentProviders;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
 use Metav\NgPayments\Exceptions\FailedTransactionException;
+use Metav\NgPayments\Exceptions\FeatureNotSupportedException;
 use Metav\NgPayments\PaymentProviders\Base\AbstractPaymentProvider;
 
 class Paystack extends AbstractPaymentProvider
@@ -124,6 +125,11 @@ class Paystack extends AbstractPaymentProvider
         return @$this->getResponseBodyAsArray()['data'] ?? [];
     }
 
+    public function deletePlan($plan_id)
+    {
+        throw new FeatureNotSupportedException("Paystack does not provide an endpoint for deleting payment plans");
+    }
+
     public function saveSubAccount($request_body)
     {
         $relative_url = "/subaccount";
@@ -152,6 +158,10 @@ class Paystack extends AbstractPaymentProvider
         return @$this->getResponseBodyAsArray()['data'] ?? [];
     }
 
+    public function deleteSubAccount($subaccount_id)
+    {
+        throw new FeatureNotSupportedException("Paystack does not provide an endpoint for deleting subaccounts");
+    }
 
     protected function adaptBodyParamsToPaystackAPI($request_body, $paystack_endpoint_params = [])
     {

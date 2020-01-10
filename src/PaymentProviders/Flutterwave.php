@@ -44,4 +44,9 @@ class Flutterwave extends AbstractPaymentProvider
     {
         // TODO: Implement chargeAuth() method.
     }
+
+    public function deletePlan($plan_id)
+    {
+        // TODO: Implement deletePlan() method.
+    }
 }

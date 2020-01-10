@@ -2,6 +2,7 @@
 
 namespace Metav\NgPayments\Tests\functional\Paystack;
 
+use Metav\NgPayments\Exceptions\FeatureNotSupportedException;
 use Metav\NgPayments\Exceptions\InvalidRequestBodyException;
 use Metav\NgPayments\Plan;
 use PHPUnit\Framework\TestCase;
@@ -72,6 +73,13 @@ class PlanTest extends TestCase
         $this->assertContainsOnlyInstancesOf(Plan::class, $plans);
     }
 
+    public function testDeletePlan()
+    {
+        $plan = new Plan("Test Plan", 3000, "weekly");
+        $plan_code = $plan->save();
+        $this->expectException(FeatureNotSupportedException::class);
+        Plan::delete($plan_code);
+    }
 
 
 }

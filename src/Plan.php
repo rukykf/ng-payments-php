@@ -3,10 +3,11 @@
 
 namespace Metav\NgPayments;
 
+use Metav\NgPayments\Interfaces\ApiDataMapperInterface;
 use Metav\NgPayments\PaymentProviders\PaymentProviderFactory;
 use Metav\NgPayments\Traits\AttributesTrait;
 
-class Plan
+class Plan implements ApiDataMapperInterface
 {
     use AttributesTrait;
 
@@ -17,7 +18,7 @@ class Plan
         $this->paymentProvider = PaymentProviderFactory::getPaymentProvider();
         if (func_num_args() == 1 && is_array(func_get_arg(0))) {
             $this->attributes = func_get_arg(0);
-        }else{
+        } else {
             $this->attributes["name"] = $plan_name;
             $this->attributes["naira_amount"] = $amount_in_naira;
             $this->attributes["interval"] = $plan_interval;
@@ -49,5 +50,10 @@ class Plan
     {
         $plan_details = PaymentProviderFactory::getPaymentProvider()->fetchPlan($plan_id);
         return new Plan($plan_details);
+    }
+
+    public static function delete($plan_id)
+    {
+        return PaymentProviderFactory::getPaymentProvider()->deletePlan($plan_id);
     }
 }
