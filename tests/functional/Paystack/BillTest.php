@@ -1,11 +1,11 @@
 <?php
 
-namespace Metav\NgPayments\Tests\functional\Paystack;
+namespace Kofi\NgPayments\Tests\functional\Paystack;
 
-use Metav\NgPayments\Bill;
-use Metav\NgPayments\Exceptions\FailedTransactionException;
-use Metav\NgPayments\PaymentProviders\PaymentProviderFactory;
-use Metav\NgPayments\Plan;
+use Kofi\NgPayments\Bill;
+use Kofi\NgPayments\Exceptions\FailedTransactionException;
+use Kofi\NgPayments\PaymentProviders\PaymentProviderFactory;
+use Kofi\NgPayments\Plan;
 use PHPUnit\Framework\TestCase;
 
 class BillTest extends TestCase

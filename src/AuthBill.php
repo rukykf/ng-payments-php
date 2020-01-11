@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Metav\NgPayments;
+namespace Kofi\NgPayments;
 
 class AuthBill extends Bill
 {

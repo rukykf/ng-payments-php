@@ -1,10 +1,10 @@
 <?php
 
 
-namespace Metav\NgPayments\PaymentProviders;
+namespace Kofi\NgPayments\PaymentProviders;
 
-use Metav\NgPayments\Exceptions\InvalidPaymentProviderConfigException;
-use Metav\NgPayments\PaymentProviders\Base\AbstractPaymentProvider;
+use Kofi\NgPayments\Exceptions\InvalidPaymentProviderConfigException;
+use Kofi\NgPayments\PaymentProviders\Base\AbstractPaymentProvider;
 use ReflectionClass;
 
 class PaymentProviderFactory
@@ -17,7 +17,8 @@ class PaymentProviderFactory
 
     protected static $paymentProviders = [
         'paystack' => Paystack::class,
-        'flutterwave' => Flutterwave::class
+        'flutterwave' => Rave::class,
+        'rave' => Rave::class
     ];
 
     public static function getPaymentProvider($paymentProviderConfig = []): AbstractPaymentProvider

@@ -1,12 +1,12 @@
 <?php
 
 
-namespace Metav\NgPayments\PaymentProviders;
+namespace Kofi\NgPayments\PaymentProviders;
 
 use GuzzleHttp\Client;
-use Metav\NgPayments\PaymentProviders\Base\AbstractPaymentProvider;
+use Kofi\NgPayments\PaymentProviders\Base\AbstractPaymentProvider;
 
-class Flutterwave extends AbstractPaymentProvider
+class Rave extends AbstractPaymentProvider
 {
     public function __construct($public_key, $secret_key, $app_env, $error_config = [])
     {

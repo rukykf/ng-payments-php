@@ -1,13 +1,13 @@
 <?php
 
 
-namespace Metav\NgPayments\PaymentProviders;
+namespace Kofi\NgPayments\PaymentProviders;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
-use Metav\NgPayments\Exceptions\FailedTransactionException;
-use Metav\NgPayments\Exceptions\FeatureNotSupportedException;
-use Metav\NgPayments\PaymentProviders\Base\AbstractPaymentProvider;
+use Kofi\NgPayments\Exceptions\FailedTransactionException;
+use Kofi\NgPayments\Exceptions\FeatureNotSupportedException;
+use Kofi\NgPayments\PaymentProviders\Base\AbstractPaymentProvider;
 
 class Paystack extends AbstractPaymentProvider
 {

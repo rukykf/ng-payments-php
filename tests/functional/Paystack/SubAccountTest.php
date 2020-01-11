@@ -1,10 +1,10 @@
 <?php
 
-namespace Metav\NgPayments\Tests\functional\Paystack;
+namespace Kofi\NgPayments\Tests\functional\Paystack;
 
-use Metav\NgPayments\Exceptions\FeatureNotSupportedException;
-use Metav\NgPayments\Exceptions\InvalidRequestBodyException;
-use Metav\NgPayments\SubAccount;
+use Kofi\NgPayments\Exceptions\FeatureNotSupportedException;
+use Kofi\NgPayments\Exceptions\InvalidRequestBodyException;
+use Kofi\NgPayments\SubAccount;
 use PHPUnit\Framework\TestCase;
 
 class SubAccountTest extends TestCase

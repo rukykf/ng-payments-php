@@ -1,11 +1,11 @@
 <?php
 
 
-namespace Metav\NgPayments;
+namespace Kofi\NgPayments;
 
-use Metav\NgPayments\Interfaces\ApiDataMapperInterface;
-use Metav\NgPayments\PaymentProviders\PaymentProviderFactory;
-use Metav\NgPayments\Traits\AttributesTrait;
+use Kofi\NgPayments\Interfaces\ApiDataMapperInterface;
+use Kofi\NgPayments\PaymentProviders\PaymentProviderFactory;
+use Kofi\NgPayments\Traits\AttributesTrait;
 
 class Plan implements ApiDataMapperInterface
 {
@@ -31,7 +31,7 @@ class Plan implements ApiDataMapperInterface
         return $this->plan_code;
     }
 
-    public static function fetchAll($query_params = null)
+    public static function fetchAll($query_params = [])
     {
         $plans_data = PaymentProviderFactory::getPaymentProvider()->fetchAllPlans($query_params);
         if ($plans_data == null) {

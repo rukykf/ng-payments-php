@@ -1,11 +1,11 @@
 <?php
 
 
-namespace Metav\NgPayments;
+namespace Kofi\NgPayments;
 
-use Metav\NgPayments\Interfaces\ApiDataMapperInterface;
-use Metav\NgPayments\PaymentProviders\PaymentProviderFactory;
-use Metav\NgPayments\Traits\AttributesTrait;
+use Kofi\NgPayments\Interfaces\ApiDataMapperInterface;
+use Kofi\NgPayments\PaymentProviders\PaymentProviderFactory;
+use Kofi\NgPayments\Traits\AttributesTrait;
 
 class SubAccount implements ApiDataMapperInterface
 {
@@ -36,7 +36,7 @@ class SubAccount implements ApiDataMapperInterface
         return $this->subaccount_code;
     }
 
-    public static function fetchAll($query_params = null)
+    public static function fetchAll($query_params = [])
     {
         $subaccounts_data = PaymentProviderFactory::getPaymentProvider()->fetchAllSubAccounts($query_params);
         $subaccounts = [];

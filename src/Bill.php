@@ -1,10 +1,10 @@
 <?php
 
 
-namespace Metav\NgPayments;
+namespace Kofi\NgPayments;
 
-use Metav\NgPayments\PaymentProviders\PaymentProviderFactory;
-use Metav\NgPayments\Traits\AttributesTrait;
+use Kofi\NgPayments\PaymentProviders\PaymentProviderFactory;
+use Kofi\NgPayments\Traits\AttributesTrait;
 
 class Bill
 {

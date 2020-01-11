@@ -1,8 +1,8 @@
 <?php
 
-namespace Metav\NgPayments\Tests\unit\Traits;
+namespace Kofi\NgPayments\Tests\unit\Traits;
 
-use Metav\NgPayments\Traits\AttributesTrait;
+use Kofi\NgPayments\Traits\AttributesTrait;
 use PHPUnit\Framework\TestCase;
 
 class AttributesTraitTest extends TestCase

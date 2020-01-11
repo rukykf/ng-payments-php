@@ -1,11 +1,11 @@
 <?php
 
 
-namespace Metav\NgPayments\PaymentProviders\Base;
+namespace Kofi\NgPayments\PaymentProviders\Base;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
-use Metav\NgPayments\Exceptions\InvalidRequestBodyException;
+use Kofi\NgPayments\Exceptions\InvalidRequestBodyException;
 
 abstract class AbstractPaymentProvider
 {

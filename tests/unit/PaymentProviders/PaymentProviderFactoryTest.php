@@ -1,10 +1,10 @@
 <?php
 
-namespace Metav\NgPayments\Tests\unit\PaymentProviders;
+namespace Kofi\NgPayments\Tests\unit\PaymentProviders;
 
-use Metav\NgPayments\Exceptions\InvalidPaymentProviderConfigException;
-use Metav\NgPayments\PaymentProviders\Base\AbstractPaymentProvider;
-use Metav\NgPayments\PaymentProviders\PaymentProviderFactory;
+use Kofi\NgPayments\Exceptions\InvalidPaymentProviderConfigException;
+use Kofi\NgPayments\PaymentProviders\Base\AbstractPaymentProvider;
+use Kofi\NgPayments\PaymentProviders\PaymentProviderFactory;
 use PHPUnit\Framework\TestCase;
 
 /**

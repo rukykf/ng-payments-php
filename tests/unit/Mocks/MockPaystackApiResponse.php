@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Metav\NgPayments\Tests\unit\Mocks;
+namespace Kofi\NgPayments\Tests\unit\Mocks;
 
 use GuzzleHttp\Psr7\Response;
 

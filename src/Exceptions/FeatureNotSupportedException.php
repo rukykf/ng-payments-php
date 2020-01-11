@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Metav\NgPayments\Exceptions;
+namespace Kofi\NgPayments\Exceptions;
 
 use BadMethodCallException;
 

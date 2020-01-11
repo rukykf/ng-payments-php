@@ -1,14 +1,14 @@
 <?php
 
-namespace Metav\NgPayments\Tests\unit\PaymentProviders;
+namespace Kofi\NgPayments\Tests\unit\PaymentProviders;
 
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Psr7\Response;
-use Metav\NgPayments\Exceptions\FailedTransactionException;
-use Metav\NgPayments\Exceptions\InvalidRequestBodyException;
-use Metav\NgPayments\PaymentProviders\Paystack;
-use Metav\NgPayments\Tests\unit\Mocks\MockHttpClient;
-use Metav\NgPayments\Tests\unit\Mocks\MockPaystackApiResponse;
+use Kofi\NgPayments\Exceptions\FailedTransactionException;
+use Kofi\NgPayments\Exceptions\InvalidRequestBodyException;
+use Kofi\NgPayments\PaymentProviders\Paystack;
+use Kofi\NgPayments\Tests\unit\Mocks\MockHttpClient;
+use Kofi\NgPayments\Tests\unit\Mocks\MockPaystackApiResponse;
 use PHPUnit\Framework\TestCase;
 
 class PaystackTest extends TestCase

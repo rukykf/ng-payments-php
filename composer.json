@@ -12,7 +12,7 @@
 
   "autoload": {
     "psr-4": {
-      "Metav\\NgPayments\\": "src/"
+      "Kofi\\NgPayments\\": "src/"
     }
   },
 
@@ -24,7 +24,7 @@
 
   "autoload-dev": {
     "psr-4": {
-      "Metav\\NgPayments\\Tests\\": "tests/"
+      "Kofi\\NgPayments\\Tests\\": "tests/"
     }
   },
   "require-dev": {

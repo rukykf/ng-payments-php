@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Metav\NgPayments\Interfaces;
+namespace Kofi\NgPayments\Interfaces;
 
 interface ApiDataMapperInterface
 {

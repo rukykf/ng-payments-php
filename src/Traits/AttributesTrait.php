@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Metav\NgPayments\Traits;
+namespace Kofi\NgPayments\Traits;
 
 trait AttributesTrait
 {
