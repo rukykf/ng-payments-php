@@ -20,9 +20,9 @@ class PaymentProviderFactoryTest extends TestCase
     public function testGetPaymentProviderLoadsConfigFromConstants()
     {
         //define constants
-        define('METAV_APP_ENV', 'local');
-        define('METAV_SECRET_KEY', 'secret');
-        define('METAV_PUBLIC_KEY', 'public');
+        define('APP_ENV', 'local');
+        define('PAYSTACK_SECRET_KEY', 'secret');
+        define('PAYSTACK_PUBLIC_KEY', 'public');
 
         $payment_provider = PaymentProviderFactory::getPaymentProvider();
         $this->assertInstanceOf(AbstractPaymentProvider::class, $payment_provider);
@@ -30,7 +30,7 @@ class PaymentProviderFactoryTest extends TestCase
 
     public function testGetPaymentProviderLoadsConfigFromEnv()
     {
-        $_ENV['METAV_PAYMENT_PROVIDER'] = 'paystack';
+        $_ENV['NG_PAYMENT_PROVIDER'] = 'paystack';
         $_ENV['APP_ENV'] = 'local';
         putenv('PAYSTACK_SECRET_KEY=secret');
         putenv('PAYSTACK_PUBLIC_KEY=public');
@@ -53,8 +53,8 @@ class PaymentProviderFactoryTest extends TestCase
 
     public function testGetPaymentProviderLoadsConfigFromString()
     {
-        putenv('METAV_PAYSTACK_SECRET_KEY=secret');
-        putenv('METAV_PAYSTACK_PUBLIC_KEY=public');
+        putenv('PAYSTACK_SECRET_KEY=secret');
+        putenv('PAYSTACK_PUBLIC_KEY=public');
         $payment_provider = PaymentProviderFactory::getPaymentProvider('paystack');
         $this->assertInstanceOf(AbstractPaymentProvider::class, $payment_provider);
     }
@@ -71,13 +71,10 @@ class PaymentProviderFactoryTest extends TestCase
 
     public function testGetPaymentProviderPrioritizesProviderSpecificConfig()
     {
-        define('METAV_PUBLIC_KEY', 'public');
-        $_ENV['METAV_PAYMENT_PROVIDER'] = 'paystack';
-        $_ENV['METAV_APP_ENV'] = 'local';
-        $_ENV['METAV_SECRET_KEY'] = 'secret';
-        putenv('METAV_PAYSTACK_SECRET_KEY=paystack_secret');
+        $_ENV['NG_PAYMENT_PROVIDER'] = 'paystack';
+        putenv('PAYSTACK_SECRET_KEY=paystack_secret');
         putenv('PAYSTACK_PUBLIC_KEY=paystack_public');
-        putenv('METAV_FLUTTERWAVE_SECRET_KEY=flutterwave_secret');
+        putenv('FLUTTERWAVE_SECRET_KEY=flutterwave_secret');
         putenv('FLUTTERWAVE_PUBLIC_KEY=flutterwave_public');
 
         $payment_provider = PaymentProviderFactory::getPaymentProvider();

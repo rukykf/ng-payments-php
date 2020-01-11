@@ -9,7 +9,7 @@ use ReflectionClass;
 
 class PaymentProviderFactory
 {
-    protected static $cachedConfig = [];
+    protected static $config = null;
 
     protected static $httpExceptions = false;
 
@@ -21,18 +21,18 @@ class PaymentProviderFactory
         'rave' => Rave::class
     ];
 
-    public static function getPaymentProvider($paymentProviderConfig = []): AbstractPaymentProvider
+    public static function getPaymentProvider($payment_provider_config = []): AbstractPaymentProvider
     {
-        if ($paymentProviderConfig instanceof AbstractPaymentProvider) {
-            return $paymentProviderConfig;
+        if ($payment_provider_config instanceof AbstractPaymentProvider) {
+            return $payment_provider_config;
         }
 
-        if (is_array($paymentProviderConfig)) {
-            return self::getPaymentProviderInstanceFromConfig($paymentProviderConfig);
+        if (is_array($payment_provider_config)) {
+            return self::getPaymentProviderInstanceFromConfig($payment_provider_config);
         }
 
-        if (is_string($paymentProviderConfig)) {
-            return self::getPaymentProviderInstanceFromConfig(['provider' => strtolower($paymentProviderConfig)]);
+        if (is_string($payment_provider_config)) {
+            return self::getPaymentProviderInstanceFromConfig(['provider' => strtolower($payment_provider_config)]);
         }
 
         throw new InvalidPaymentProviderConfigException();
@@ -60,22 +60,28 @@ class PaymentProviderFactory
 
     public static function setPaymentProviderConfig(array $config)
     {
-        self::$cachedConfig = $config;
+        self::$config = $config;
     }
 
-    protected static function getPaymentProviderInstanceFromConfig($config_array = [])
+    protected static function getPaymentProviderInstanceFromConfig($config = [])
     {
-        $config_array = self::getValidConfig($config_array);
-        $provider = $config_array['provider'];
-        $public_key = $config_array['public_key'];
-        $secret_key = $config_array['secret_key'];
-        $app_env = $config_array['app_env'];
+        if (self::$config !== null && empty($config)) {
+            $config = self::$config;
+        }
+
+        $config = self::getValidConfig($config);
+        $provider = $config['provider'];
+        $public_key = $config['public_key'];
+        $secret_key = $config['secret_key'];
+        $app_env = $config['app_env'];
         $error_config = [
             "http_exceptions" => self::$httpExceptions,
             "transaction_exceptions" => self::$transactionExceptions
         ];
         $provider_class = new ReflectionClass(self::$paymentProviders[$provider]);
-        return $provider_class->newInstance($public_key, $secret_key, $app_env, $error_config);
+        $provider_instance = $provider_class->newInstance($public_key, $secret_key, $app_env);
+        $provider_instance->setErrorConfig($error_config);
+        return $provider_instance;
     }
 
     protected static function isValidConfig($config)
@@ -106,38 +112,28 @@ class PaymentProviderFactory
     protected static function getValidConfig($config_array = [])
     {
         $config['provider'] = $config_array['provider']
-            ?? self::$cachedConfig['provider']
-            ?? self::getConstant("METAV_PAYMENT_PROVIDER")
-            ?? self::getEnv("METAV_PAYMENT_PROVIDER")
+            ?? self::$config['provider']
+            ?? self::getConstant("NG_PAYMENT_PROVIDER")
+            ?? self::getEnv("NG_PAYMENT_PROVIDER")
             ?? 'paystack';
 
         $config['app_env'] = $config_array['app_env']
-            ?? self::$cachedConfig['app_env']
-            ?? self::getConstant("METAV_APP_ENV")
+            ?? self::$config['app_env']
             ?? self::getConstant("APP_ENV")
-            ?? self::getEnv("METAV_APP_ENV")
             ?? self::getEnv("APP_ENV")
             ?? 'production';
 
         $provider_public = strtoupper($config['provider']) . "_PUBLIC_KEY";
         $config['public_key'] = $config_array['public_key']
-            ?? self::$cachedConfig['public_key']
+            ?? self::$config['public_key']
             ?? self::getConstant($provider_public)
-            ?? self::getConstant("METAV_" . $provider_public)
-            ?? self::getEnv($provider_public)
-            ?? self::getEnv("METAV_" . $provider_public)
-            ?? self::getConstant("METAV_PUBLIC_KEY")
-            ?? self::getEnv("METAV_PUBLIC_KEY");
+            ?? self::getEnv($provider_public);
 
         $provider_secret = strtoupper($config['provider']) . "_SECRET_KEY";
         $config['secret_key'] = $config_array['secret_key']
-            ?? self::$cachedConfig['secret_key']
+            ?? self::$config['secret_key']
             ?? self::getConstant($provider_secret)
-            ?? self::getConstant("METAV_" . $provider_secret)
-            ?? self::getEnv($provider_secret)
-            ?? self::getEnv("METAV_" . $provider_secret)
-            ?? self::getConstant("METAV_SECRET_KEY")
-            ?? self::getEnv("METAV_SECRET_KEY");
+            ?? self::getEnv($provider_secret);
 
         if (self::isValidConfig($config) == false) {
             throw new InvalidPaymentProviderConfigException("Required configuration values are not defined");
