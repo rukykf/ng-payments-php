@@ -1,6 +1,6 @@
 {
-  "name": "metav/ngpayments",
-  "description": "Package for billing and subscribing customers using Nigerian payment gateways (Paystack & Flutterwave)",
+  "name": "kofi/ngpayments",
+  "description": "Package for billing and subscribing customers using Nigerian payment gateways (Paystack & Flutterwave/Rave)",
   "type": "library",
   "license": "MIT",
   "authors": [

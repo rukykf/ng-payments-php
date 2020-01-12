@@ -243,7 +243,7 @@ class PaystackTest extends TestCase
     public function testFetchAllPlans()
     {
         $this->paystack->setHttpClient(MockHttpClient::getHttpClient([
-            MockPaystackApiResponse::getSuccessfulListPlansResponse()
+            MockPaystackApiResponse::getSuccessfulFetchAllPlansResponse()
         ]));
 
         $plans = $this->paystack->fetchAllPlans();
@@ -302,7 +302,7 @@ class PaystackTest extends TestCase
         $this->assertEquals(null, $subaccount_code);
 
         //test update
-        MockHttpClient::appendResponsesToMockHttpClient([MockPaystackApiResponse::getSuccessfulUpdatePlanResponse()]);
+        MockHttpClient::appendResponsesToMockHttpClient([MockPaystackApiResponse::getSuccessfulUpdateSubAccountResponse()]);
         $subaccount_code = $this->paystack->saveSubAccount(["subaccount_code" => "subaccount_code"]);
         $this->assertEquals("subaccount_code", $subaccount_code);
 
@@ -318,7 +318,7 @@ class PaystackTest extends TestCase
     public function testFetchAllSubAccounts()
     {
         $this->paystack->setHttpClient(MockHttpClient::getHttpClient([
-            MockPaystackApiResponse::getSuccessfulListSubAccountsResponse()
+            MockPaystackApiResponse::getSuccessfulFetchAllSubAccountsResponse()
         ]));
         $subaccounts = $this->paystack->fetchAllSubAccounts();
         $this->assertEquals(3, count($subaccounts));

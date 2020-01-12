@@ -310,7 +310,7 @@ class MockPaystackApiResponse
         return new Response(200, [], json_encode($response_body));
     }
 
-    public static function getSuccessfulListPlansResponse()
+    public static function getSuccessfulFetchAllPlansResponse()
     {
         $response_body = [
             "status" => true,
@@ -486,7 +486,7 @@ class MockPaystackApiResponse
         return new Response(200, [], json_encode($response_body));
     }
 
-    public static function getSuccessfulListSubAccountsResponse()
+    public static function getSuccessfulFetchAllSubAccountsResponse()
     {
         $response_body = [
             'status' => true,

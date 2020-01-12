@@ -5,7 +5,9 @@ namespace Kofi\NgPayments\PaymentProviders\Base;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Uri;
 use Kofi\NgPayments\Exceptions\InvalidRequestBodyException;
+use Psr\Http\Message\RequestInterface;
 
 abstract class AbstractPaymentProvider
 {
@@ -25,6 +27,38 @@ abstract class AbstractPaymentProvider
         $this->appEnv = $app_env;
         $this->httpClient = new Client();
     }
+
+    //region interfaces
+    abstract public function initializePayment($request_body);
+
+    abstract public function isPaymentValid($reference, $expected_naira_amount);
+
+    abstract public function chargeAuth($request_body);
+
+    abstract public function getPaymentPageUrl();
+
+    abstract public function getPaymentReference();
+
+    abstract public function getPaymentAuthorizationCode();
+
+    abstract public function savePlan($request_body);
+
+    abstract public function fetchAllPlans($query_params = []);
+
+    abstract public function fetchPlan($plan_id);
+
+    abstract public function deletePlan($plan_id);
+
+    abstract public function saveSubAccount($request_body);
+
+    abstract public function fetchAllSubAccounts($query_params = []);
+
+    abstract public function fetchSubAccount($subaccount_id);
+
+    abstract public function deleteSubAccount($subaccount_id);
+    //endregion
+
+    //region getters and setters
 
     /**
      * @return string
@@ -134,27 +168,47 @@ abstract class AbstractPaymentProvider
 
     public function sendRequest(Request $request, $options = [])
     {
+        $options["http_errors"] = $this->httpExceptions;
         $this->httpResponse = $this->httpClient->send($request, $options);
         return $this->httpResponse;
     }
 
-    abstract public function initializePayment($request_body);
+    //endregion
 
-    abstract public function isPaymentValid($reference, $naira_amount);
+    //region Helpers
+    /**
+     * @param $uri
+     * @param array $request_body
+     * @param $http_method
+     * @param $is_query
+     * @param array $headers
+     * @return Request
+     */
+    protected function createRequest(
+        $uri,
+        array $headers,
+        array $request_body,
+        $http_method = "POST",
+        $is_query = true
+    ): Request {
+        $uri = new Uri($uri);
+        if ($http_method == "GET" && $is_query == true) {
+            $uri = Uri::withQueryValues($uri, $request_body);
+            $request = new Request($http_method, $uri, $headers);
+        } else {
+            $request = new Request($http_method, $uri, $headers, json_encode($request_body));
+        }
+        return $request;
+    }
 
-    abstract public function chargeAuth($request_body);
-
-    abstract public function getPaymentPageUrl();
-
-    abstract public function getPaymentReference();
-
-    abstract public function getPaymentAuthorizationCode();
-
-    protected function validateRequestBodyHasRequiredParams($request_body, $required_params)
-    {
+    protected function validateRequestBodyHasRequiredParams(
+        $request_body,
+        $required_params,
+        RequestInterface $request = null
+    ) {
         foreach ($required_params as $param) {
             if (!array_key_exists($param, $request_body) || @$request_body[$param] === null) {
-                throw new InvalidRequestBodyException($param . " is a required parameter for this request");
+                throw new InvalidRequestBodyException($param . " is a required parameter for this request", $request);
             }
         }
 
@@ -178,4 +232,6 @@ abstract class AbstractPaymentProvider
         }
         return $api_request_body;
     }
+    //endregion
+
 }

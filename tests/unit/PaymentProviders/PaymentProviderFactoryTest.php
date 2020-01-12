@@ -5,6 +5,7 @@ namespace Kofi\NgPayments\Tests\unit\PaymentProviders;
 use Kofi\NgPayments\Exceptions\InvalidPaymentProviderConfigException;
 use Kofi\NgPayments\PaymentProviders\Base\AbstractPaymentProvider;
 use Kofi\NgPayments\PaymentProviders\PaymentProviderFactory;
+use Kofi\NgPayments\PaymentProviders\Rave;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -63,10 +64,12 @@ class PaymentProviderFactoryTest extends TestCase
     {
         PaymentProviderFactory::setPaymentProviderConfig([
             'public_key' => 'public',
-            'secret_key' => 'secret'
+            'secret_key' => 'secret',
+            'provider' => 'rave'
         ]);
-        $payment_provider = PaymentProviderFactory::getPaymentProvider('paystack');
+        $payment_provider = PaymentProviderFactory::getPaymentProvider();
         $this->assertInstanceOf(AbstractPaymentProvider::class, $payment_provider);
+        $this->assertInstanceOf(Rave::class, $payment_provider);
     }
 
     public function testGetPaymentProviderPrioritizesProviderSpecificConfig()

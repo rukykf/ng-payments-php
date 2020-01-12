@@ -9,7 +9,7 @@ use ReflectionClass;
 
 class PaymentProviderFactory
 {
-    protected static $config = null;
+    protected static $config = [];
 
     protected static $httpExceptions = false;
 
@@ -65,9 +65,7 @@ class PaymentProviderFactory
 
     protected static function getPaymentProviderInstanceFromConfig($config = [])
     {
-        if (self::$config !== null && empty($config)) {
-            $config = self::$config;
-        }
+        $config = array_merge(self::$config, $config);
 
         $config = self::getValidConfig($config);
         $provider = $config['provider'];
