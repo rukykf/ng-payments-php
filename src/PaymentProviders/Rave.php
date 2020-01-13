@@ -4,7 +4,9 @@
 namespace Kofi\NgPayments\PaymentProviders;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\BadResponseException;
 use Kofi\NgPayments\Exceptions\FailedTransactionException;
+use Kofi\NgPayments\Exceptions\InvalidRequestBodyException;
 use Kofi\NgPayments\PaymentProviders\Base\AbstractPaymentProvider;
 
 class Rave extends AbstractPaymentProvider
@@ -16,11 +18,17 @@ class Rave extends AbstractPaymentProvider
         $this->httpClient = new Client(['base_uri' => $this->baseUrl]);
     }
 
+    /**
+     * @param array $request_body
+     * @return string|null reference for this transaction or null if the request failed
+     * @throws InvalidRequestBodyException
+     * @throws BadResponseException if httpExceptions are enabled
+     */
     public function initializePayment($request_body)
     {
         $relative_url = "/flwv3-pug/getpaidx/api/v2/hosted/pay";
         $request_body = $this->adaptBodyParamsToRaveAPI($request_body, ['plan_code' => 'payment_plan']);
-        $request_body = $this->processSubAccountForRaveTransactionEndpoint($request_body);
+        $request_body = $this->processSubAccountsForRaveTransactionEndpoint($request_body);
         $request_body = $this->addRaveTransactionDefaults($request_body);
         $request_body['PBFPubKey'] = $this->publicKey;
         $request = $this->createRequestForRave($relative_url, $request_body);
@@ -32,14 +40,20 @@ class Rave extends AbstractPaymentProvider
         return null;
     }
 
+    /**
+     * @param string $reference
+     * @param float $expected_naira_amount
+     * @return bool
+     * @throws FailedTransactionException if transactionExceptions are enabled
+     */
     public function isPaymentValid($reference, $expected_naira_amount)
     {
         $relative_url = "/flwv3-pug/getpaidx/api/v2/verify";
         $request_body = ["SECKEY" => $this->secretKey, "txref" => $reference];
         $request = $this->createRequestForRave($relative_url, $request_body);
         $this->sendRequest($request);
-        $status = @$this->getResponseBodyAsArray()["data"]["status"];
-        $amount_paid = @$this->getResponseBodyAsArray()["data"]["chargedamount"];
+        $status = @$this->getResponseBody()["data"]["status"];
+        $amount_paid = @$this->getResponseBody()["data"]["chargedamount"];
 
         if ($this->transactionExceptions == true && $status != "successful") {
             throw new FailedTransactionException($request, $this->httpResponse);
@@ -56,6 +70,15 @@ class Rave extends AbstractPaymentProvider
         return false;
     }
 
+    /**
+     * Used along with the customer's embedtoken to bill the customer
+     * without requesting for their payment details again
+     *
+     * @param array $request_body
+     * @return string|null transaction reference or null if the request failed
+     * @throws InvalidRequestBodyException
+     * @throws FailedTransactionException if transactionExceptions are enabled
+     */
     public function chargeAuth($request_body)
     {
         $relative_url = "/flwv3-pug/getpaidx/api/tokenized/charge";
@@ -64,7 +87,7 @@ class Rave extends AbstractPaymentProvider
             ["customer_email" => "email", "plan_code" => "payment_plan"]
         );
         $request_body = $this->addRaveTransactionDefaults($request_body);
-        $request_body = $this->processSubAccountForRaveTransactionEndpoint($request_body);
+        $request_body = $this->processSubAccountsForRaveTransactionEndpoint($request_body);
 
         //Rave is not very consistent with its parameter spellings across endpoints
         //this is a quirk I noticed for this endpoint
@@ -75,7 +98,7 @@ class Rave extends AbstractPaymentProvider
         $request = $this->createRequestForRave($relative_url, $request_body);
         $this->validateRequestBodyHasRequiredParams($request_body, ["amount", "email", "token"], $request);
         $this->sendRequest($request);
-        $status = @$this->getResponseBodyAsArray()["data"]["status"];
+        $status = @$this->getResponseBody()["data"]["status"];
 
         if ($this->transactionExceptions == true && $status != "successful") {
             throw new FailedTransactionException($request, $this->httpResponse);
@@ -88,22 +111,42 @@ class Rave extends AbstractPaymentProvider
         return null;
     }
 
+    /**
+     * Should be called after calling initializePayment() to retrieve the Url to redirect the customer to for payment
+     *
+     * @return string|null
+     */
     public function getPaymentPageUrl()
     {
-        return @$this->getResponseBodyAsArray()['data']['link'];
+        return @$this->getResponseBody()['data']['link'];
     }
 
+    /**
+     * @return string|null
+     */
     public function getPaymentReference()
     {
-        $response_body = $this->getResponseBodyAsArray();
+        $response_body = $this->getResponseBody();
         return @$response_body['data']['txref'] ?? @$response_body['data']['txRef'];
     }
 
+    /**
+     * Should be called after isPaymentValid() to retrieve the embedtoken
+     * which can be used to charge the customer again in the future
+     *
+     * @return string|null
+     */
     public function getPaymentAuthorizationCode()
     {
-        return @$this->getResponseBodyAsArray()['data']['card']['card_tokens'][0]['embedtoken'];
+        return @$this->getResponseBody()['data']['card']['card_tokens'][0]['embedtoken'];
     }
 
+    /**
+     * @param array $request_body
+     * @return mixed|null id of the saved plan or null if the request failed
+     * @throws BadResponseException if httpExceptions are enabled
+     * @throws InvalidRequestBodyException
+     */
     public function savePlan($request_body)
     {
         $request_body = $this->adaptBodyParamsToRaveAPI($request_body, ["plan_code" => "id"]);
@@ -115,6 +158,11 @@ class Rave extends AbstractPaymentProvider
         }
     }
 
+    /**
+     * @param array $query_params
+     * @return array|null an array of plan assoc arrays or null if the request failed
+     * @throws BadResponseException if httpExceptions are enabled
+     */
     public function fetchAllPlans($query_params = [])
     {
         $relative_url = "/v2/gpx/paymentplans/query";
@@ -122,9 +170,14 @@ class Rave extends AbstractPaymentProvider
         $query_params['seckey'] = $this->secretKey;
         $request = $this->createRequestForRave($relative_url, $query_params, 'GET', true);
         $this->sendRequest($request);
-        return @$this->getResponseBodyAsArray()['data']['paymentplans'];
+        return @$this->getResponseBody()['data']['paymentplans'];
     }
 
+    /**
+     * @param $plan_id
+     * @return array|null an assoc array of plan details or null if the request failed
+     * @throws BadResponseException if httpExceptions are enabled
+     */
     public function fetchPlan($plan_id)
     {
         $relative_url = "/v2/gpx/paymentplans/query";
@@ -134,17 +187,28 @@ class Rave extends AbstractPaymentProvider
         ];
         $request = $this->createRequestForRave($relative_url, $query_params, 'GET', true);
         $this->sendRequest($request);
-        return @$this->getResponseBodyAsArray()['data']['paymentplans'][0];
+        return @$this->getResponseBody()['data']['paymentplans'][0];
     }
 
+    /**
+     * @param $plan_id
+     * @return string|null a success message or null if the request failed
+     * @throws BadResponseException if httpExceptions are enabled
+     */
     public function deletePlan($plan_id)
     {
         $relative_url = "/v2/gpx/paymentplans/" . $plan_id . "/cancel";
         $request = $this->createRequestForRave($relative_url, ['seckey' => $this->secretKey]);
         $this->sendRequest($request);
-        return @$this->getResponseBodyAsArray()['data']['status'];
+        return @$this->getResponseBody()['data']['status'];
     }
 
+    /**
+     * @param array $request_body
+     * @return mixed|null the saved subaccount's subaccount_id or null if the request failed
+     * @throws InvalidRequestBodyException
+     * @throws BadResponseException if httpExceptions are enbabled
+     */
     public function saveSubAccount($request_body)
     {
         $request_body = $this->adaptBodyParamsToRaveAPI(
@@ -159,47 +223,83 @@ class Rave extends AbstractPaymentProvider
         }
     }
 
+    /**
+     * @param array $query_params
+     * @return array|null an array of subaccount assoc arrays or null if the request failed
+     * @throws BadResponseException if httpExceptions are enabled
+     */
     public function fetchAllSubAccounts($query_params = [])
     {
         $relative_url = "/v2/gpx/subaccounts";
         $request = $this->createRequestForRave($relative_url, ['seckey' => $this->secretKey], 'GET', true);
         $this->sendRequest($request);
-        return @$this->getResponseBodyAsArray()['data']['subaccounts'];
+        return @$this->getResponseBody()['data']['subaccounts'];
     }
 
+    /**
+     * @param $subaccount_id
+     * @return array|null an assoc array containing the subaccount's data or null if the request failed
+     * @throws BadResponseException if httpExceptions are enabled
+     */
     public function fetchSubAccount($subaccount_id)
     {
         $relative_url = "/v2/gpx/subaccounts/get/" . $subaccount_id;
         $request = $this->createRequestForRave($relative_url, ['seckey' => $this->secretKey], 'GET', true);
         $this->sendRequest($request);
-        return @$this->getResponseBodyAsArray()['data'];
+        return @$this->getResponseBody()['data'];
     }
 
+    /**
+     * @param $subaccount_id
+     * @return string|null a success message or null if the request failed
+     * @throws BadResponseException if httpExceptions are enabled
+     */
     public function deleteSubAccount($subaccount_id)
     {
         $relative_url = "/v2/gpx/subaccounts/delete";
         $request = $this->createRequestForRave($relative_url, ['seckey' => $this->secretKey, 'id' => $subaccount_id]);
         $this->sendRequest($request);
-        return @$this->getResponseBodyAsArray()['status'];
+        return @$this->getResponseBody()['status'];
     }
 
+    /**
+     * @param $request_body
+     * @return mixed|null
+     * @throws InvalidRequestBodyException
+     * @throws BadResponseException if httpExceptions are enabled
+     */
     private function createPlan($request_body)
     {
         $relative_url = "/v2/gpx/paymentplans/create";
         $request = $this->createRequestForRave($relative_url, $request_body);
         $this->validateRequestBodyHasRequiredParams($request_body, ["amount", "name", "interval"]);
         $this->sendRequest($request);
-        return @$this->getResponseBodyAsArray()['data']['id'];
+        return @$this->getResponseBody()['data']['id'];
     }
 
+    /**
+     * @param $request_body
+     * @param $plan_id
+     * @return mixed|null
+     * @throws BadResponseException if httpExceptions are enabled
+     */
     private function updatePlan($request_body, $plan_id)
     {
         $relative_url = "/v2/gpx/paymentplans/" . $plan_id . "/edit";
         $request = $this->createRequestForRave($relative_url, $request_body);
         $this->sendRequest($request);
-        return @$this->getResponseBodyAsArray()['data']['id'];
+        return @$this->getResponseBody()['data']['id'];
     }
 
+    /**
+     * Rave has two methods of identifying subaccounts: a numeric Id and an alphanumeric string
+     * it makes use of the numeric Id for some subaccount endpoints and the alphanumeric string on others
+     * this function converts the alphanumeric subaccount_id into the corresponding numeric id for the same subaccount
+     *
+     * @param $subaccount_id
+     * @return string|int
+     * @throws BadResponseException if httpExceptions are enabled
+     */
     private function translateSubAccountId($subaccount_id)
     {
         if (is_int($subaccount_id)) {
@@ -209,6 +309,12 @@ class Rave extends AbstractPaymentProvider
         return $subaccount['id'];
     }
 
+    /**
+     * @param $request_body
+     * @return mixed|null
+     * @throws InvalidRequestBodyException
+     * @throws BadResponseException if httpExceptions are enabled
+     */
     private function createSubAccount($request_body)
     {
         $relative_url = "/v2/gpx/subaccounts/create";
@@ -221,9 +327,15 @@ class Rave extends AbstractPaymentProvider
             $request
         );
         $this->sendRequest($request);
-        return @$this->getResponseBodyAsArray()['data']['subaccount_id'];
+        return @$this->getResponseBody()['data']['subaccount_id'];
     }
 
+    /**
+     * @param $request_body
+     * @param $subaccount_id
+     * @return mixed|null
+     * @throws BadResponseException if httpExceptions are enabled
+     */
     private function updateSubAccount($request_body, $subaccount_id)
     {
         $relative_url = "/v2/gpx/subaccounts/edit";
@@ -231,9 +343,16 @@ class Rave extends AbstractPaymentProvider
         $request_body['id'] = $subaccount_id;
         $request = $this->createRequestForRave($relative_url, $request_body);
         $this->sendRequest($request);
-        return @$this->getResponseBodyAsArray()['data']['subaccount_id'];
+        return @$this->getResponseBody()['data']['subaccount_id'];
     }
 
+    /**
+     * @param string $relative_url
+     * @param array $request_body
+     * @param string $http_method
+     * @param bool $is_query
+     * @return \GuzzleHttp\Psr7\Request
+     */
     private function createRequestForRave(
         string $relative_url,
         array $request_body,
@@ -251,6 +370,11 @@ class Rave extends AbstractPaymentProvider
         return $this->createRequest($url, $headers, $request_body, $http_method, $is_query);
     }
 
+    /**
+     * @param $request_body
+     * @param array $rave_endpoint_params
+     * @return array
+     */
     private function adaptBodyParamsToRaveAPI($request_body, $rave_endpoint_params = [])
     {
         $rave_params = $this->getRaveParams();
@@ -265,6 +389,10 @@ class Rave extends AbstractPaymentProvider
         return $rave_request_body;
     }
 
+    /**
+     * @param array $request_body
+     * @return array
+     */
     private function addRaveTransactionDefaults(array $request_body)
     {
         if (!isset($request_body['currency'])) {
@@ -282,6 +410,10 @@ class Rave extends AbstractPaymentProvider
         return $request_body;
     }
 
+    /**
+     * @param array $request_body
+     * @return array
+     */
     private function addRaveCreateSubAccountDefaults(array $request_body)
     {
         if (!isset($request_body['split_type'])) {
@@ -295,6 +427,10 @@ class Rave extends AbstractPaymentProvider
         return $request_body;
     }
 
+    /**
+     * @param mixed $id
+     * @return string
+     */
     private function generateUniqueTransactionReference($id = null)
     {
         $random_string = chr(rand(65, 90)) . chr(rand(65, 90)) . chr(rand(65, 90));
@@ -302,6 +438,9 @@ class Rave extends AbstractPaymentProvider
         return $transaction_reference;
     }
 
+    /**
+     * @return array
+     */
     private function getRaveParams()
     {
         return [
@@ -310,6 +449,9 @@ class Rave extends AbstractPaymentProvider
         ];
     }
 
+    /**
+     * @return array
+     */
     private function getRaveCreateSubAccountParams()
     {
         return [
@@ -322,7 +464,7 @@ class Rave extends AbstractPaymentProvider
      * @param $request_body
      * @return mixed
      */
-    private function processSubAccountForRaveTransactionEndpoint($request_body)
+    private function processSubAccountsForRaveTransactionEndpoint($request_body)
     {
         if (isset($request_body['subaccount_code'])) {
             $request_body['subaccounts'] = [

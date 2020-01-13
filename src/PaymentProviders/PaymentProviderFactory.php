@@ -9,18 +9,35 @@ use ReflectionClass;
 
 class PaymentProviderFactory
 {
+    /**
+     * @var array
+     */
     protected static $config = [];
 
+    /**
+     * @var bool
+     */
     protected static $httpExceptions = false;
 
+    /**
+     * @var bool
+     */
     protected static $transactionExceptions = true;
 
+    /**
+     * @var array
+     */
     protected static $paymentProviders = [
         'paystack' => Paystack::class,
         'flutterwave' => Rave::class,
         'rave' => Rave::class
     ];
 
+    /**
+     * @param array $payment_provider_config
+     * @return AbstractPaymentProvider
+     * @throws InvalidPaymentProviderConfigException
+     */
     public static function getPaymentProvider($payment_provider_config = []): AbstractPaymentProvider
     {
         if ($payment_provider_config instanceof AbstractPaymentProvider) {
@@ -82,7 +99,7 @@ class PaymentProviderFactory
         return $provider_instance;
     }
 
-    protected static function isValidConfig($config)
+    protected static function isConfigValid($config)
     {
         if ($config['provider'] == null || $config['app_env'] == null || $config['public_key'] == null
             || $config['secret_key'] == null) {
@@ -133,7 +150,7 @@ class PaymentProviderFactory
             ?? self::getConstant($provider_secret)
             ?? self::getEnv($provider_secret);
 
-        if (self::isValidConfig($config) == false) {
+        if (self::isConfigValid($config) == false) {
             throw new InvalidPaymentProviderConfigException("Required configuration values are not defined");
         }
 

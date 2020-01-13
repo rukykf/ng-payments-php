@@ -4,8 +4,10 @@
 namespace Kofi\NgPayments\PaymentProviders;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\BadResponseException;
 use Kofi\NgPayments\Exceptions\FailedTransactionException;
 use Kofi\NgPayments\Exceptions\FeatureNotSupportedException;
+use Kofi\NgPayments\Exceptions\InvalidRequestBodyException;
 use Kofi\NgPayments\PaymentProviders\Base\AbstractPaymentProvider;
 
 class Paystack extends AbstractPaymentProvider
@@ -17,6 +19,14 @@ class Paystack extends AbstractPaymentProvider
         $this->httpClient = new Client(['base_uri' => $this->baseUrl]);
     }
 
+    /**
+     * Start a new transaction
+     *
+     * @param array $request_body
+     * @return string|null reference for this transaction or null if the request failed
+     * @throws InvalidRequestBodyException
+     * @throws BadResponseException if httpExceptions are enabled
+     */
     public function initializePayment($request_body)
     {
         $relative_url = '/transaction/initialize';
@@ -30,13 +40,21 @@ class Paystack extends AbstractPaymentProvider
         return $this->getPaymentReference();
     }
 
+    /**
+     * Checks if the customer paid the amount that they were expected to pay
+     *
+     * @param string $reference
+     * @param float $expected_naira_amount
+     * @return boolean
+     * @throws FailedTransactionException if transactionExceptions are turned on
+     */
     public function isPaymentValid($reference, $expected_naira_amount)
     {
         $relative_url = '/transaction/verify/' . $reference;
         $request = $this->createRequestForPaystack($relative_url, [], 'GET');
         $this->sendRequest($request);
 
-        $response_body = $this->getResponseBodyAsArray();
+        $response_body = $this->getResponseBody();
         $status = @$response_body['data']['status'];
         $expected_amount = $expected_naira_amount * 100;
         $amount_paid = @$response_body['data']['amount'];
@@ -56,6 +74,15 @@ class Paystack extends AbstractPaymentProvider
         return false;
     }
 
+    /**
+     * Used along with the authorization_code to bill a customer without
+     * requesting for their payment details again
+     *
+     * @param array $request_body
+     * @return string|null transaction reference or null if the request failed
+     * @throws InvalidRequestBodyException
+     * @throws FailedTransactionException if transactionExceptions are enabled
+     */
     public function chargeAuth($request_body)
     {
         $relative_url = "/transaction/charge_authorization";
@@ -67,7 +94,7 @@ class Paystack extends AbstractPaymentProvider
         $this->validateRequestBodyHasRequiredParams($request_body, ['email', 'amount', 'authorization_code'], $request);
         $this->sendRequest($request);
 
-        $status = @$this->getResponseBodyAsArray()['data']['status'];
+        $status = @$this->getResponseBody()['data']['status'];
         if ($this->transactionExceptions == true && $status != 'success') {
             throw new FailedTransactionException($request, $this->httpResponse);
         }
@@ -78,21 +105,41 @@ class Paystack extends AbstractPaymentProvider
         return null;
     }
 
+    /**
+     * Should be called after calling initializePayment() to retrieve the Url to redirect the customer to for payment
+     *
+     * @return string|null
+     */
     public function getPaymentPageUrl()
     {
-        return @$this->getResponseBodyAsArray()['data']['authorization_url'];
+        return @$this->getResponseBody()['data']['authorization_url'];
     }
 
+    /**
+     * @return string|null
+     */
     public function getPaymentReference()
     {
-        return @$this->getResponseBodyAsArray()['data']['reference'];
+        return @$this->getResponseBody()['data']['reference'];
     }
 
+    /**
+     * Should be called after isPaymentValid() to retrieve the authorization_code
+     * which can be used to charge the customer again in the future
+     *
+     * @return string|null
+     */
     public function getPaymentAuthorizationCode()
     {
-        return @$this->getResponseBodyAsArray()['data']['authorization']['authorization_code'];
+        return @$this->getResponseBody()['data']['authorization']['authorization_code'];
     }
 
+    /**
+     * @param array $request_body
+     * @return mixed|null returns the id of the saved plan or null if the request failed
+     * @throws InvalidRequestBodyException
+     * @throws BadResponseException if httpExceptions are enabled
+     */
     public function savePlan($request_body)
     {
         $relative_url = "/plan";
@@ -106,28 +153,49 @@ class Paystack extends AbstractPaymentProvider
         }
     }
 
+    /**
+     * @param array $query_params
+     * @return array|null array of plan assoc arrays or null if the request failed
+     * @throws BadResponseException if httpExceptions are enabled
+     */
     public function fetchAllPlans($query_params = [])
     {
         $relative_url = "/plan";
         $query_params = $this->adaptBodyParamsToPaystackAPI($query_params);
         $request = $this->createRequestForPaystack($relative_url, $query_params, 'GET', true);
         $this->sendRequest($request);
-        return @$this->getResponseBodyAsArray()['data'];
+        return @$this->getResponseBody()['data'];
     }
 
+    /**
+     * @param $plan_id
+     * @return array|null an assoc array of plan details or null if the request failed
+     * @throws BadResponseException if httpExceptions are enabled
+     */
     public function fetchPlan($plan_id)
     {
         $relative_url = "/plan" . "/" . $plan_id;
         $request = $this->createRequestForPaystack($relative_url, [], 'GET', true);
         $this->sendRequest($request);
-        return @$this->getResponseBodyAsArray()['data'];
+        return @$this->getResponseBody()['data'];
     }
 
+    /**
+     * @param $plan_id
+     * @return string|null a success message or null if the request failed
+     * @throws BadResponseException if httpExceptions are enabled
+     */
     public function deletePlan($plan_id)
     {
         throw new FeatureNotSupportedException("Paystack does not provide an endpoint for deleting payment plans");
     }
 
+    /**
+     * @param array $request_body
+     * @return mixed|null the saved subaccount's subaccount_id or null if the request failed
+     * @throws InvalidRequestBodyException
+     * @throws BadResponseException if httpExceptions are enabled
+     */
     public function saveSubAccount($request_body)
     {
         $relative_url = "/subaccount";
@@ -141,23 +209,38 @@ class Paystack extends AbstractPaymentProvider
         }
     }
 
+    /**
+     * @param array $query_params
+     * @return array|null an array of subaccount assoc arrays or null if the request failed
+     * @throws BadResponseException if httpExceptions are enabled
+     */
     public function fetchAllSubAccounts($query_params = [])
     {
         $relative_url = "/subaccount";
         $query_params = $this->adaptBodyParamsToPaystackAPI($query_params);
         $request = $this->createRequestForPaystack($relative_url, $query_params, 'GET', true);
         $this->sendRequest($request);
-        return @$this->getResponseBodyAsArray()['data'];
+        return @$this->getResponseBody()['data'];
     }
 
+    /**
+     * @param $subaccount_id
+     * @return array|null an assoc array containing the subaccount's data or null if the request failed
+     * @throws BadResponseException if httpExceptions are enabled
+     */
     public function fetchSubAccount($subaccount_id)
     {
         $relative_url = "/subaccount" . "/" . $subaccount_id;
         $request = $this->createRequestForPaystack($relative_url, [], 'GET', true);
         $this->sendRequest($request);
-        return @$this->getResponseBodyAsArray()['data'];
+        return @$this->getResponseBody()['data'];
     }
 
+    /**
+     * @param $subaccount_id
+     * @return string|null a success message or null if the request failed
+     * @throws BadResponseException if httpExceptions are enabled
+     */
     public function deleteSubAccount($subaccount_id)
     {
         throw new FeatureNotSupportedException("Paystack does not provide an endpoint for deleting subaccounts");
@@ -174,7 +257,7 @@ class Paystack extends AbstractPaymentProvider
         $request = $this->createRequestForPaystack($relative_url, $request_body);
         $this->validateRequestBodyHasRequiredParams($request_body, ['name', 'amount', 'interval'], $request);
         $this->sendRequest($request);
-        return @$this->getResponseBodyAsArray()['data']['plan_code'];
+        return @$this->getResponseBody()['data']['plan_code'];
     }
 
     /**
@@ -189,7 +272,7 @@ class Paystack extends AbstractPaymentProvider
         $request = $this->createRequestForPaystack($relative_url, $request_body, 'PUT');
         $this->sendRequest($request);
 
-        if (@$this->getResponseBodyAsArray()["status"] == true) {
+        if (@$this->getResponseBody()["status"] == true) {
             return $plan_id;
         }
         return null;
@@ -204,7 +287,7 @@ class Paystack extends AbstractPaymentProvider
             $request
         );
         $this->sendRequest($request);
-        return @$this->getResponseBodyAsArray()['data']['subaccount_code'];
+        return @$this->getResponseBody()['data']['subaccount_code'];
     }
 
     /**
@@ -218,12 +301,19 @@ class Paystack extends AbstractPaymentProvider
         $relative_url .= "/" . $subaccount_id;
         $request = $this->createRequestForPaystack($relative_url, $request_body, 'PUT');
         $this->sendRequest($request);
-        if (@$this->getResponseBodyAsArray()["status"] == true) {
+        if (@$this->getResponseBody()["status"] == true) {
             return $subaccount_id;
         }
         return null;
     }
 
+    /**
+     * @param string $relative_url
+     * @param array $request_body
+     * @param string $http_method
+     * @param bool $is_query
+     * @return \GuzzleHttp\Psr7\Request
+     */
     private function createRequestForPaystack(
         $relative_url,
         array $request_body,
@@ -240,6 +330,11 @@ class Paystack extends AbstractPaymentProvider
         return $this->createRequest($url, $headers, $request_body, $http_method, $is_query);
     }
 
+    /**
+     * @param array $request_body
+     * @param array $paystack_endpoint_params
+     * @return array
+     */
     private function adaptBodyParamsToPaystackAPI($request_body, $paystack_endpoint_params = [])
     {
         $paystack_params = $this->getPaystackParams();
@@ -255,6 +350,9 @@ class Paystack extends AbstractPaymentProvider
         return $paystack_request_body;
     }
 
+    /**
+     * @return array
+     */
     private function getPaystackParams()
     {
         return [
@@ -262,6 +360,9 @@ class Paystack extends AbstractPaymentProvider
         ];
     }
 
+    /**
+     * @return array
+     */
     private function getPaystackTransactionEndpointParams()
     {
         return [
