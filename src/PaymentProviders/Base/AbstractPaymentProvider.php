@@ -177,6 +177,13 @@ abstract class AbstractPaymentProvider
      */
     abstract public function deleteSubAccount($subaccount_id);
 
+    /**
+     * @param array $query_params
+     * @return array|null
+     * @throws BadResponseException if httpExceptions are enabled
+     */
+    abstract public function fetchBanks($query_params = []);
+
     //endregion
 
     //region getters and setters

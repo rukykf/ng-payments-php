@@ -86,4 +86,10 @@ class SubAccountTest extends TestCase
         $this->expectException(FeatureNotSupportedException::class);
         SubAccount::delete($subaccount_code);
     }
+
+    public function testFetchBanks()
+    {
+        $banks = SubAccount::fetchBanks();
+        $this->assertNotNull($banks);
+    }
 }

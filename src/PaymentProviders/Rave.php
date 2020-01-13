@@ -263,6 +263,21 @@ class Rave extends AbstractPaymentProvider
     }
 
     /**
+     * @param array $query_params
+     * @return array|null
+     * @throws BadResponseException if httpExceptions are enabled
+     */
+    public function fetchBanks($query_params = [])
+    {
+        $country = $query_params["country"] ?? "NG";
+        $relative_url = "/v2/banks/" . $country;
+        $query_params["public_key"] = $this->publicKey;
+        $request = $this->createRequestForRave($relative_url, $query_params, 'GET', true);
+        $this->sendRequest($request);
+        return @$this->getResponseBody()["data"]["Banks"];
+    }
+
+    /**
      * @param $request_body
      * @return mixed|null
      * @throws InvalidRequestBodyException
@@ -363,7 +378,8 @@ class Rave extends AbstractPaymentProvider
             "Content-Type" => "application/json"
         ];
         $url = $this->baseUrl . $relative_url;
-        if (!isset($request_body['PBFPubKey']) && !isset($request_body['SECKEY']) && !isset($request_body['seckey'])) {
+        if (!isset($request_body['PBFPubKey']) && !isset($request_body['SECKEY'])
+            && !isset($request_body['seckey']) && !isset($request_body['public_key'])) {
             $request_body['seckey'] = $this->secretKey;
         }
 

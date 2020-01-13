@@ -65,4 +65,9 @@ class SubAccount implements ApiDataMapperInterface
     {
         return PaymentProviderFactory::getPaymentProvider()->deleteSubAccount($subaccount_id);
     }
+
+    public static function fetchBanks($query_params = [])
+    {
+        return PaymentProviderFactory::getPaymentProvider()->fetchBanks($query_params);
+    }
 }

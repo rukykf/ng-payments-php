@@ -247,10 +247,27 @@ class Paystack extends AbstractPaymentProvider
     }
 
     /**
+     * @param array $query_params
+     * @return array|null
+     * @throws BadResponseException if httpExceptions are enabled
+     */
+    public function fetchBanks($query_params = [])
+    {
+        $relative_url = "/bank";
+        if (!isset($query_params["country"])) {
+            $query_params["country"] = "Nigeria";
+        }
+
+        $request = $this->createRequestForPaystack($relative_url, $query_params, 'GET', true);
+        $this->sendRequest($request);
+        return @$this->getResponseBody()['data'];
+    }
+
+    /**
      * @param $request_body
      * @param string $relative_url
-     * @return int|null
-     * @throws \Metav\NgPayments\Exceptions\InvalidRequestBodyException
+     * @return mixed|null
+     * @throws InvalidRequestBodyException
      */
     private function createPlan($request_body, string $relative_url)
     {
@@ -264,7 +281,8 @@ class Paystack extends AbstractPaymentProvider
      * @param $request_body
      * @param $plan_id
      * @param string $relative_url
-     * @return mixed
+     * @return mixed|null
+     * @throws BadResponseException if httpExceptions are enabled
      */
     private function updatePlan($request_body, $plan_id, string $relative_url)
     {
@@ -278,6 +296,13 @@ class Paystack extends AbstractPaymentProvider
         return null;
     }
 
+    /**
+     * @param array $request_body
+     * @param string $relative_url
+     * @return mixed|null
+     * @throws InvalidRequestBodyException
+     * @throws BadResponseException if httpExceptions are enabled
+     */
     private function createSubAccount(array $request_body, string $relative_url)
     {
         $request = $this->createRequestForPaystack($relative_url, $request_body);
@@ -294,7 +319,8 @@ class Paystack extends AbstractPaymentProvider
      * @param $request_body
      * @param $subaccount_id
      * @param string $relative_url
-     * @return mixed
+     * @return mixed|null
+     * @throws BadResponseException if httpExceptions are enabled
      */
     private function updateSubAccount($request_body, $subaccount_id, string $relative_url)
     {
