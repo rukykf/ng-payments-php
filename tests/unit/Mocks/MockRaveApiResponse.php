@@ -462,6 +462,31 @@ class MockRaveApiResponse
         return new Response(200, [], json_encode($response_body));
     }
 
+    public static function getSuccessfulUpdateSubAccountResponse()
+    {
+        $response_body = [
+            "status" => "success",
+            "message" => "SUBACCOUNT-EDITED",
+            "data" => [
+                "id" => 2114,
+                "account_number" => "1234567890",
+                "account_bank" => "044",
+                "business_name" => "Edited Test Business",
+                "fullname" => "Bale Gary",
+                "date_created" => "2020-01-11T21:08:43.000Z",
+                "meta" => null,
+                "account_id" => 87705,
+                "split_ratio" => 1,
+                "split_type" => "percentage",
+                "split_value" => 4,
+                "subaccount_id" => "mock_subaccount_id",
+                "bank_name" => "ACCESS BANK NIGERIA",
+                "country" => "NG"
+            ]
+        ];
+        return new Response(200, [], json_encode($response_body));
+    }
+
     public static function getSuccessfulFetchAllSubAccountsResponse()
     {
         $response_body = [

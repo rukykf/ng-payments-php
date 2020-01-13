@@ -14,7 +14,6 @@ use PHPUnit\Framework\TestCase;
 class PaystackTest extends TestCase
 {
     private $paystack = null;
-    private $mockHttpClient = null;
 
     public function setUp(): void
     {

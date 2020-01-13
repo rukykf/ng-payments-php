@@ -147,7 +147,10 @@ class Rave extends AbstractPaymentProvider
 
     public function saveSubAccount($request_body)
     {
-        $request_body = $this->adaptBodyParamsToPaystackAPI($request_body, ["subaccount_code" => "id"]);
+        $request_body = $this->adaptBodyParamsToRaveAPI(
+            $request_body,
+            ["subaccount_code" => "id", "percentage_charge" => "split_value"]
+        );
         $subaccount_id = @$request_body['id'] ?? @$request_body['subaccount_id'];
         if ($subaccount_id == null) {
             return $this->createSubAccount($request_body);
@@ -177,11 +180,7 @@ class Rave extends AbstractPaymentProvider
         $relative_url = "/v2/gpx/subaccounts/delete";
         $request = $this->createRequestForRave($relative_url, ['seckey' => $this->secretKey, 'id' => $subaccount_id]);
         $this->sendRequest($request);
-        if (@$this->getResponseBodyAsArray()['status'] == "success") {
-            return "successfully deleted";
-        }
-
-        return null;
+        return @$this->getResponseBodyAsArray()['status'];
     }
 
     private function createPlan($request_body)
@@ -306,7 +305,8 @@ class Rave extends AbstractPaymentProvider
     private function getRaveParams()
     {
         return [
-            "authorization_code" => "token"
+            "authorization_code" => "token",
+            "settlement_bank" => "account_bank"
         ];
     }
 
