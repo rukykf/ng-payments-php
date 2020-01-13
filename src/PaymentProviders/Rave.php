@@ -19,13 +19,17 @@ class Rave extends AbstractPaymentProvider
     public function initializePayment($request_body)
     {
         $relative_url = "/flwv3-pug/getpaidx/api/v2/hosted/pay";
-        $request_body = $this->adaptBodyParamsToRaveAPI($request_body);
+        $request_body = $this->adaptBodyParamsToRaveAPI($request_body, ['plan_code' => 'payment_plan']);
+        $request_body = $this->processSubAccountForRaveTransactionEndpoint($request_body);
         $request_body = $this->addRaveTransactionDefaults($request_body);
         $request_body['PBFPubKey'] = $this->publicKey;
-        $this->validateRequestBodyHasRequiredParams($request_body, ['email', 'amount']);
         $request = $this->createRequestForRave($relative_url, $request_body);
-        $this->httpResponse = $this->httpClient->send($request, ["http_errors" => $this->httpExceptions]);
-        return $request_body['txref'];
+        $this->validateRequestBodyHasRequiredParams($request_body, ['customer_email', 'amount'], $request);
+        $this->sendRequest($request);
+        if ($this->httpResponse->getStatusCode() == 200) {
+            return $request_body['txref'];
+        }
+        return null;
     }
 
     public function isPaymentValid($reference, $expected_naira_amount)
@@ -55,8 +59,12 @@ class Rave extends AbstractPaymentProvider
     public function chargeAuth($request_body)
     {
         $relative_url = "/flwv3-pug/getpaidx/api/tokenized/charge";
-        $request_body = $this->adaptBodyParamsToRaveAPI($request_body, ["customer_email" => "email"]);
+        $request_body = $this->adaptBodyParamsToRaveAPI(
+            $request_body,
+            ["customer_email" => "email", "plan_code" => "payment_plan"]
+        );
         $request_body = $this->addRaveTransactionDefaults($request_body);
+        $request_body = $this->processSubAccountForRaveTransactionEndpoint($request_body);
 
         //Rave is not very consistent with its parameter spellings across endpoints
         //this is a quirk I noticed for this endpoint
@@ -93,12 +101,12 @@ class Rave extends AbstractPaymentProvider
 
     public function getPaymentAuthorizationCode()
     {
-        return @$this->getResponseBodyAsArray()['data']['card']['card_tokens']['embedtoken'];
+        return @$this->getResponseBodyAsArray()['data']['card']['card_tokens'][0]['embedtoken'];
     }
 
     public function savePlan($request_body)
     {
-        $request_body = $this->adaptBodyParamsToPaystackAPI($request_body);
+        $request_body = $this->adaptBodyParamsToRaveAPI($request_body, ["plan_code" => "id"]);
         $plan_id = @$request_body['id'];
         if ($plan_id == null) {
             return $this->createPlan($request_body);
@@ -125,7 +133,7 @@ class Rave extends AbstractPaymentProvider
             "seckey" => $this->secretKey
         ];
         $request = $this->createRequestForRave($relative_url, $query_params, 'GET', true);
-        $this->sendRequest();
+        $this->sendRequest($request);
         return @$this->getResponseBodyAsArray()['data']['paymentplans'][0];
     }
 
@@ -139,7 +147,7 @@ class Rave extends AbstractPaymentProvider
 
     public function saveSubAccount($request_body)
     {
-        $request_body = $this->adaptBodyParamsToPaystackAPI($request_body);
+        $request_body = $this->adaptBodyParamsToPaystackAPI($request_body, ["subaccount_code" => "id"]);
         $subaccount_id = @$request_body['id'] ?? @$request_body['subaccount_id'];
         if ($subaccount_id == null) {
             return $this->createSubAccount($request_body);
@@ -290,7 +298,7 @@ class Rave extends AbstractPaymentProvider
 
     private function generateUniqueTransactionReference($id = null)
     {
-        $random_string = chr(rand(65, 90) . rand(65, 90) . rand(65, 90));
+        $random_string = chr(rand(65, 90)) . chr(rand(65, 90)) . chr(rand(65, 90));
         $transaction_reference = uniqid($random_string, true) . time() . $id;
         return $transaction_reference;
     }
@@ -298,9 +306,7 @@ class Rave extends AbstractPaymentProvider
     private function getRaveParams()
     {
         return [
-            "subaccount_code" => "id",
-            "authorization_code" => "token",
-            "plan_code" => "id"
+            "authorization_code" => "token"
         ];
     }
 
@@ -310,5 +316,21 @@ class Rave extends AbstractPaymentProvider
             "settlement_bank" => "account_bank",
             "percentage_charge" => "split_value",
         ];
+    }
+
+    /**
+     * @param $request_body
+     * @return mixed
+     */
+    private function processSubAccountForRaveTransactionEndpoint($request_body)
+    {
+        if (isset($request_body['subaccount_code'])) {
+            $request_body['subaccounts'] = [
+                [
+                    'id' => $request_body['subaccount_code']
+                ]
+            ];
+        }
+        return $request_body;
     }
 }

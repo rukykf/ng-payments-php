@@ -52,7 +52,7 @@ class Bill
     public static function getPaymentAuthorizationCode($payment_reference, $naira_amount)
     {
         $payment_provider = PaymentProviderFactory::getPaymentProvider();
-        $is_valid = $payment_provider->isPaymentValid($payment_reference, $naira_amount);
+        $payment_provider->isPaymentValid($payment_reference, $naira_amount);
         return $payment_provider->getPaymentAuthorizationCode();
     }
 
