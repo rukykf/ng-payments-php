@@ -182,8 +182,7 @@ class Paystack extends AbstractPaymentProvider
 
     /**
      * @param $plan_id
-     * @return string|null a success message or null if the request failed
-     * @throws BadResponseException if httpExceptions are enabled
+     * @throws FeatureNotSupportedException
      */
     public function deletePlan($plan_id)
     {
@@ -238,8 +237,7 @@ class Paystack extends AbstractPaymentProvider
 
     /**
      * @param $subaccount_id
-     * @return string|null a success message or null if the request failed
-     * @throws BadResponseException if httpExceptions are enabled
+     * @throws FeatureNotSupportedException if httpExceptions are enabled
      */
     public function deleteSubAccount($subaccount_id)
     {
@@ -268,6 +266,7 @@ class Paystack extends AbstractPaymentProvider
      * @param string $relative_url
      * @return mixed|null
      * @throws InvalidRequestBodyException
+     * @throws BadResponseException if httpExceptions are enabled
      */
     private function createPlan($request_body, string $relative_url)
     {
