@@ -100,6 +100,11 @@ You can use kebab-case like so:
 $bill->setCallbackUrl($callback_url, 'kebab-case'); 
 ```
 
+If you don't want any type of case applied use
+```php
+$bill->setCallbackUrl($callback_url, 'none');
+```
+
 **Using Magic properties**
 
 ```php
