@@ -4,12 +4,12 @@ namespace Kofi\NgPayments\Tests\functional\Paystack;
 
 use Kofi\NgPayments\Exceptions\FeatureNotSupportedException;
 use Kofi\NgPayments\Exceptions\InvalidRequestBodyException;
-use Kofi\NgPayments\SubAccount;
+use Kofi\NgPayments\Subaccount;
 use PHPUnit\Framework\TestCase;
 
-class SubAccountTest extends TestCase
+class SubaccountTest extends TestCase
 {
-    public function testSubAccountConstructorOverload()
+    public function testSubaccountConstructorOverload()
     {
         $attributes = [
             "business_name" => "test business",
@@ -18,28 +18,28 @@ class SubAccountTest extends TestCase
             "percentage_charge" => 3
         ];
 
-        $subaccount = new SubAccount($attributes);
+        $subaccount = new Subaccount($attributes);
         $this->assertEquals($attributes, $subaccount->getAttributes());
     }
 
-    public function testCreateSubAccount()
+    public function testCreateSubaccount()
     {
-        $subaccount = new SubAccount("Test Business", "Zenith Bank", '0000000000', 3);
+        $subaccount = new Subaccount("Test Business", "Zenith Bank", '0000000000', 3);
         $subaccount_code = $subaccount->save();
         $this->assertNotNull($subaccount_code);
 
         $this->expectException(InvalidRequestBodyException::class);
-        $sub = new SubAccount();
+        $sub = new Subaccount();
         $sub->save();
     }
 
-    public function testUpdateSubAccount()
+    public function testUpdateSubaccount()
     {
-        $subaccount = new SubAccount("Test Business", "Zenith Bank", '0000000000', 3);
+        $subaccount = new Subaccount("Test Business", "Zenith Bank", '0000000000', 3);
         $subaccount_code = $subaccount->save();
         $this->assertNotNull($subaccount_code);
 
-        $fetched_subaccount = SubAccount::fetch($subaccount_code);
+        $fetched_subaccount = Subaccount::fetch($subaccount_code);
         $this->assertNull($fetched_subaccount->primary_contact_email);
         $this->assertNull($fetched_subaccount->primary_contact_name);
         $this->assertEquals($subaccount_code, $fetched_subaccount->subaccount_code);
@@ -47,49 +47,49 @@ class SubAccountTest extends TestCase
         $fetched_subaccount->primary_contact_email = "contact@email.com";
         $fetched_subaccount->primary_contact_name = "Contact Name";
         $fetched_subaccount->save();
-        $fetched_subaccount = SubAccount::fetch($subaccount_code);
+        $fetched_subaccount = Subaccount::fetch($subaccount_code);
         $this->assertEquals("contact@email.com", $fetched_subaccount->primary_contact_email);
         $this->assertEquals("Contact Name", $fetched_subaccount->primary_contact_name);
 
-        $subaccount = new SubAccount();
+        $subaccount = new Subaccount();
         $subaccount->id = "UNKNOWN";
         $this->assertNull($subaccount->save());
     }
 
-    public function testFetchAllSubAccounts()
+    public function testFetchAllSubaccounts()
     {
         //to ensure there's at least one subaccount
-        $subaccount = new SubAccount("Test Business", "Zenith Bank", '0000000000', 3);
+        $subaccount = new Subaccount("Test Business", "Zenith Bank", '0000000000', 3);
         $subaccount_code = $subaccount->save();
 
-        $subaccounts = SubAccount::fetchAll();
+        $subaccounts = Subaccount::fetchAll();
         $this->assertNotNull($subaccounts);
-        $this->assertContainsOnlyInstancesOf(SubAccount::class, $subaccounts);
+        $this->assertContainsOnlyInstancesOf(Subaccount::class, $subaccounts);
     }
 
-    public function testFetchSubAccount()
+    public function testFetchSubaccount()
     {
-        $subaccount = new SubAccount("Test Business", "Zenith Bank", '0000000000', 3);
+        $subaccount = new Subaccount("Test Business", "Zenith Bank", '0000000000', 3);
         $subaccount_code = $subaccount->save();
 
-        $subaccount = SubAccount::fetch($subaccount_code);
+        $subaccount = Subaccount::fetch($subaccount_code);
         $this->assertEquals("Zenith Bank", $subaccount->settlement_bank);
 
-        $subaccount = SubAccount::fetch("Invalid Subaccount");
+        $subaccount = Subaccount::fetch("Invalid Subaccount");
         $this->assertNull($subaccount);
     }
 
-    public function testDeleteSubAccount()
+    public function testDeleteSubaccount()
     {
-        $subaccount = new SubAccount("Test Business", "Zenith Bank", '0000000000', 3);
+        $subaccount = new Subaccount("Test Business", "Zenith Bank", '0000000000', 3);
         $subaccount_code = $subaccount->save();
         $this->expectException(FeatureNotSupportedException::class);
-        SubAccount::delete($subaccount_code);
+        Subaccount::delete($subaccount_code);
     }
 
     public function testFetchBanks()
     {
-        $banks = SubAccount::fetchBanks();
+        $banks = Subaccount::fetchBanks();
         $this->assertNotNull($banks);
     }
 }

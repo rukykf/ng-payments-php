@@ -5,7 +5,7 @@ namespace Kofi\NgPayments\PaymentProviders;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\BadResponseException;
-use Kofi\NgPayments\Exceptions\FailedTransactionException;
+use Kofi\NgPayments\Exceptions\FailedPaymentException;
 use Kofi\NgPayments\Exceptions\InvalidRequestBodyException;
 use Kofi\NgPayments\PaymentProviders\Base\AbstractPaymentProvider;
 
@@ -44,7 +44,7 @@ class Rave extends AbstractPaymentProvider
      * @param string $reference
      * @param float $expected_naira_amount
      * @return bool
-     * @throws FailedTransactionException if transactionExceptions are enabled
+     * @throws FailedPaymentException if paymentExceptions are enabled
      */
     public function isPaymentValid($reference, $expected_naira_amount)
     {
@@ -55,12 +55,12 @@ class Rave extends AbstractPaymentProvider
         $status = @$this->getResponseBody()["data"]["status"];
         $amount_paid = @$this->getResponseBody()["data"]["chargedamount"];
 
-        if ($this->transactionExceptions == true && $status != "successful") {
-            throw new FailedTransactionException($request, $this->httpResponse);
+        if ($this->paymentExceptions == true && $status != "successful") {
+            throw new FailedPaymentException($request, $this->httpResponse);
         }
 
-        if ($this->transactionExceptions == true && $amount_paid != $expected_naira_amount) {
-            throw new FailedTransactionException($request, $this->httpResponse);
+        if ($this->paymentExceptions == true && $amount_paid != $expected_naira_amount) {
+            throw new FailedPaymentException($request, $this->httpResponse);
         }
 
         if ($status == "successful" && $amount_paid == $expected_naira_amount) {
@@ -77,7 +77,7 @@ class Rave extends AbstractPaymentProvider
      * @param array $request_body
      * @return string|null transaction reference or null if the request failed
      * @throws InvalidRequestBodyException
-     * @throws FailedTransactionException if transactionExceptions are enabled
+     * @throws FailedPaymentException if paymentExceptions are enabled
      */
     public function chargeAuth($request_body)
     {
@@ -100,8 +100,8 @@ class Rave extends AbstractPaymentProvider
         $this->sendRequest($request);
         $status = @$this->getResponseBody()["data"]["status"];
 
-        if ($this->transactionExceptions == true && $status != "successful") {
-            throw new FailedTransactionException($request, $this->httpResponse);
+        if ($this->paymentExceptions == true && $status != "successful") {
+            throw new FailedPaymentException($request, $this->httpResponse);
         }
 
         if ($status == "successful") {
@@ -209,7 +209,7 @@ class Rave extends AbstractPaymentProvider
      * @throws InvalidRequestBodyException
      * @throws BadResponseException if httpExceptions are enbabled
      */
-    public function saveSubAccount($request_body)
+    public function saveSubaccount($request_body)
     {
         $request_body = $this->adaptBodyParamsToRaveAPI(
             $request_body,
@@ -217,9 +217,9 @@ class Rave extends AbstractPaymentProvider
         );
         $subaccount_id = @$request_body['id'] ?? @$request_body['subaccount_id'];
         if ($subaccount_id == null) {
-            return $this->createSubAccount($request_body);
+            return $this->createSubaccount($request_body);
         } else {
-            return $this->updateSubAccount($request_body, $subaccount_id);
+            return $this->updateSubaccount($request_body, $subaccount_id);
         }
     }
 
@@ -228,7 +228,7 @@ class Rave extends AbstractPaymentProvider
      * @return array|null an array of subaccount assoc arrays or null if the request failed
      * @throws BadResponseException if httpExceptions are enabled
      */
-    public function fetchAllSubAccounts($query_params = [])
+    public function fetchAllSubaccounts($query_params = [])
     {
         $relative_url = "/v2/gpx/subaccounts";
         $request = $this->createRequestForRave($relative_url, ['seckey' => $this->secretKey], 'GET', true);
@@ -241,7 +241,7 @@ class Rave extends AbstractPaymentProvider
      * @return array|null an assoc array containing the subaccount's data or null if the request failed
      * @throws BadResponseException if httpExceptions are enabled
      */
-    public function fetchSubAccount($subaccount_id)
+    public function fetchSubaccount($subaccount_id)
     {
         $relative_url = "/v2/gpx/subaccounts/get/" . $subaccount_id;
         $request = $this->createRequestForRave($relative_url, ['seckey' => $this->secretKey], 'GET', true);
@@ -254,7 +254,7 @@ class Rave extends AbstractPaymentProvider
      * @return string|null a success message or null if the request failed
      * @throws BadResponseException if httpExceptions are enabled
      */
-    public function deleteSubAccount($subaccount_id)
+    public function deleteSubaccount($subaccount_id)
     {
         $relative_url = "/v2/gpx/subaccounts/delete";
         $request = $this->createRequestForRave($relative_url, ['seckey' => $this->secretKey, 'id' => $subaccount_id]);
@@ -320,7 +320,7 @@ class Rave extends AbstractPaymentProvider
         if (is_int($subaccount_id)) {
             return $subaccount_id;
         }
-        $subaccount = $this->fetchSubAccount($subaccount_id);
+        $subaccount = $this->fetchSubaccount($subaccount_id);
         return $subaccount['id'];
     }
 
@@ -330,7 +330,7 @@ class Rave extends AbstractPaymentProvider
      * @throws InvalidRequestBodyException
      * @throws BadResponseException if httpExceptions are enabled
      */
-    private function createSubAccount($request_body)
+    private function createSubaccount($request_body)
     {
         $relative_url = "/v2/gpx/subaccounts/create";
         $request_body = $this->adaptBodyParamsToRaveAPI($request_body, $this->getRaveCreateSubAccountParams());
@@ -351,7 +351,7 @@ class Rave extends AbstractPaymentProvider
      * @return mixed|null
      * @throws BadResponseException if httpExceptions are enabled
      */
-    private function updateSubAccount($request_body, $subaccount_id)
+    private function updateSubaccount($request_body, $subaccount_id)
     {
         $relative_url = "/v2/gpx/subaccounts/edit";
         $subaccount_id = $this->translateSubAccountId($subaccount_id);

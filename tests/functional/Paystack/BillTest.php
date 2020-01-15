@@ -3,7 +3,7 @@
 namespace Kofi\NgPayments\Tests\functional\Paystack;
 
 use Kofi\NgPayments\Bill;
-use Kofi\NgPayments\Exceptions\FailedTransactionException;
+use Kofi\NgPayments\Exceptions\FailedPaymentException;
 use Kofi\NgPayments\PaymentProviders\PaymentProviderFactory;
 use Kofi\NgPayments\Plan;
 use PHPUnit\Framework\TestCase;
@@ -16,20 +16,20 @@ class BillTest extends TestCase
         $bill = new Bill("customer@email.com", 5000);
 
         $payment_provider = &$bill->getPaymentProvider();
-        $payment_provider->disableTransactionExceptions();
+        $payment_provider->disablePaymentExceptions();
         $reference = $bill->charge()->getPaymentReference();
         $payment_page_url = $bill->getPaymentPageUrl();
         $this->assertNotNull($reference);
         $this->assertNotNull($payment_page_url);
 
-        PaymentProviderFactory::disableTransactionExceptions();
+        PaymentProviderFactory::disablePaymentExceptions();
         $is_valid = Bill::isPaymentValid($reference, 5000);
         $this->assertFalse($is_valid);
         $authorization_code = Bill::getPaymentAuthorizationCode($reference, 5000);
         $this->assertNull($authorization_code);
 
-        PaymentProviderFactory::enableTransactionExceptions();
-        $this->expectException(FailedTransactionException::class);
+        PaymentProviderFactory::enablePaymentExceptions();
+        $this->expectException(FailedPaymentException::class);
         Bill::isPaymentValid($reference, 5000);
     }
 
@@ -39,20 +39,20 @@ class BillTest extends TestCase
         $plan->save();
         $bill = new Bill("customer@email.com", 5000);
         $payment_provider = &$bill->getPaymentProvider();
-        $payment_provider->disableTransactionExceptions();
+        $payment_provider->disablePaymentExceptions();
         $reference = $bill->subscribe($plan->plan_code)->getPaymentReference();
         $payment_page_url = $bill->getPaymentPageUrl();
         $this->assertNotNull($reference);
         $this->assertNotNull($payment_page_url);
 
-        PaymentProviderFactory::disableTransactionExceptions();
+        PaymentProviderFactory::disablePaymentExceptions();
         $is_valid = Bill::isPaymentValid($reference, 4000);
         $this->assertFalse($is_valid);
         $authorization_code = Bill::getPaymentAuthorizationCode($reference, 4000);
         $this->assertNull($authorization_code);
 
-        PaymentProviderFactory::enableTransactionExceptions();
-        $this->expectException(FailedTransactionException::class);
+        PaymentProviderFactory::enablePaymentExceptions();
+        $this->expectException(FailedPaymentException::class);
         Bill::isPaymentValid($reference, 4000);
     }
 }

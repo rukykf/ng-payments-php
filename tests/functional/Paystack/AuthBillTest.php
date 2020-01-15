@@ -3,7 +3,7 @@
 namespace Kofi\NgPayments\Tests\functional\Paystack;
 
 use Kofi\NgPayments\AuthBill;
-use Kofi\NgPayments\Exceptions\FailedTransactionException;
+use Kofi\NgPayments\Exceptions\FailedPaymentException;
 use Kofi\NgPayments\Plan;
 use PHPUnit\Framework\TestCase;
 
@@ -13,12 +13,12 @@ class AuthBillTest extends TestCase
     {
         $bill = new AuthBill("AUTH_CODE", "customer@email.com", 3000);
         $payment_provider = &$bill->getPaymentProvider();
-        $payment_provider->disableTransactionExceptions();
+        $payment_provider->disablePaymentExceptions();
         $reference = $bill->charge();
         $this->assertNull($reference);
 
-        $payment_provider->enableTransactionExceptions();
-        $this->expectException(FailedTransactionException::class);
+        $payment_provider->enablePaymentExceptions();
+        $this->expectException(FailedPaymentException::class);
         $bill->charge();
     }
 
@@ -28,12 +28,12 @@ class AuthBillTest extends TestCase
         $plan->save();
         $bill = new AuthBill("AUTH_CODE", "customer@email.com", 5000);
         $payment_provider = &$bill->getPaymentProvider();
-        $payment_provider->disableTransactionExceptions();
+        $payment_provider->disablePaymentExceptions();
         $reference = $bill->subscribe($plan->plan_code);
         $this->assertNull($reference);
 
-        $payment_provider->enableTransactionExceptions();
-        $this->expectException(FailedTransactionException::class);
+        $payment_provider->enablePaymentExceptions();
+        $this->expectException(FailedPaymentException::class);
         $bill->subscribe($plan->plan_code);
     }
 }

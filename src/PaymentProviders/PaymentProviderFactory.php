@@ -65,12 +65,12 @@ class PaymentProviderFactory
         self::$httpExceptions = false;
     }
 
-    public static function enableTransactionExceptions()
+    public static function enablePaymentExceptions()
     {
         self::$transactionExceptions = true;
     }
 
-    public static function disableTransactionExceptions()
+    public static function disablePaymentExceptions()
     {
         self::$transactionExceptions = false;
     }
@@ -136,7 +136,7 @@ class PaymentProviderFactory
             ?? self::$config['app_env']
             ?? self::getConstant("APP_ENV")
             ?? self::getEnv("APP_ENV")
-            ?? 'production';
+            ?? 'testing';
 
         $provider_public = strtoupper($config['provider']) . "_PUBLIC_KEY";
         $config['public_key'] = $config_array['public_key']

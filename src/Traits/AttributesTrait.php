@@ -57,6 +57,10 @@ trait AttributesTrait
             return $this->toKebabCase($input);
         }
 
+        if ($case == 'none') {
+            return $input;
+        }
+
         return $input;
     }
 

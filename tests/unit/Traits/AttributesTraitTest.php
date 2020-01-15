@@ -39,12 +39,14 @@ class AttributesTraitTest extends TestCase
     {
         $this->testClass->setCallbackUrl('example.com/callback');
         $this->testClass->setColorShade('dark', 'kebab-case');
+        $this->testClass->setMealType('a meal', 'none');
         $this->testClass->setCustomerEmail('customer@email.com', 'snake_case');
         $this->testClass->setCustomerName('customer name', 'no-case');
 
         $attributes = $this->testClass->getAttributes();
         $this->assertEquals('example.com/callback', $attributes['callback_url']);
         $this->assertEquals('dark', $attributes['color-shade']);
+        $this->assertEquals('a meal', $attributes['MealType']);
         $this->assertEquals('customer@email.com', $attributes['customer_email']);
         $this->assertEquals('customer name', $attributes['CustomerName']);
 

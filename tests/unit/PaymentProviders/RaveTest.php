@@ -4,7 +4,7 @@ namespace Kofi\NgPayments\Tests\unit\PaymentProviders;
 
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Psr7\Response;
-use Kofi\NgPayments\Exceptions\FailedTransactionException;
+use Kofi\NgPayments\Exceptions\FailedPaymentException;
 use Kofi\NgPayments\Exceptions\InvalidRequestBodyException;
 use Kofi\NgPayments\PaymentProviders\Rave;
 use Kofi\NgPayments\Tests\unit\Mocks\MockHttpClient;
@@ -83,7 +83,7 @@ class RaveTest extends TestCase
             MockRaveApiResponse::getFailedVerifyPaymentResponse(),
         ]));
 
-        $this->rave->disableTransactionExceptions();
+        $this->rave->disablePaymentExceptions();
         $is_valid = $this->rave->isPaymentValid("mock_reference", 5000);
         $this->assertTrue($is_valid);
 
@@ -93,8 +93,8 @@ class RaveTest extends TestCase
         $is_valid = $this->rave->isPaymentValid("mock_reference", 5000);
         $this->assertFalse($is_valid);
 
-        $this->rave->enableTransactionExceptions();
-        $this->expectException(FailedTransactionException::class);
+        $this->rave->enablePaymentExceptions();
+        $this->expectException(FailedPaymentException::class);
         $this->rave->isPaymentValid("mock_reference", 5000);
     }
 
@@ -106,7 +106,7 @@ class RaveTest extends TestCase
             MockRaveApiResponse::getFailedChargeAuthResponse()
         ]));
 
-        $this->rave->disableTransactionExceptions();
+        $this->rave->disablePaymentExceptions();
         $reference = $this->rave->chargeAuth([
             "naira_amount" => 3000,
             "authorization_code" => "mock_token",
@@ -127,8 +127,8 @@ class RaveTest extends TestCase
         ]);
         $this->assertNull($reference);
 
-        $this->rave->enableTransactionExceptions();
-        $this->expectException(FailedTransactionException::class);
+        $this->rave->enablePaymentExceptions();
+        $this->expectException(FailedPaymentException::class);
         $reference = $this->rave->chargeAuth([
             "naira_amount" => 3000,
             "authorization_code" => "mock_token",
@@ -222,14 +222,14 @@ class RaveTest extends TestCase
         $this->assertNull($plans);
     }
 
-    public function testCreateSubAccount()
+    public function testCreateSubaccount()
     {
         $this->rave->setHttpClient(MockHttpClient::getHttpClient([
             MockRaveApiResponse::getSuccessfulCreateSubAccountResponse(),
             new Response(400)
         ]));
 
-        $subaccount_id = $this->rave->saveSubAccount([
+        $subaccount_id = $this->rave->saveSubaccount([
             "business_name" => "Test Business",
             "settlement_bank" => "044",
             "account_number" => "000000000",
@@ -243,7 +243,7 @@ class RaveTest extends TestCase
         $this->assertEquals("percentage", $sent_request_body["split_type"]);
         $this->assertEquals("mock_subaccount_id", $subaccount_id);
 
-        $subaccount_id = $this->rave->saveSubAccount([
+        $subaccount_id = $this->rave->saveSubaccount([
             "business_name" => "Test Business",
             "settlement_bank" => "044",
             "account_number" => "000000000",
@@ -254,7 +254,7 @@ class RaveTest extends TestCase
         $this->assertNull($subaccount_id);
     }
 
-    public function testUpdateSubAccount()
+    public function testUpdateSubaccount()
     {
         $this->rave->setHttpClient(MockHttpClient::getHttpClient([
             MockRaveApiResponse::getSuccessfulFetchSubAccountResponse(),
@@ -263,7 +263,7 @@ class RaveTest extends TestCase
             new Response(400)
         ]));
 
-        $subaccount_id = $this->rave->saveSubAccount([
+        $subaccount_id = $this->rave->saveSubaccount([
             "subaccount_code" => "mock_subaccount_id",
             "business_name" => "Test Business"
         ]);
@@ -271,59 +271,59 @@ class RaveTest extends TestCase
         $this->assertEquals("mock_subaccount_id", $subaccount_id);
         $this->assertEquals(2115, $sent_request_body["id"]);
 
-        $subaccount_id = $this->rave->saveSubAccount([
+        $subaccount_id = $this->rave->saveSubaccount([
             "subaccount_code" => 2115,
             "business_name" => "Test Business"
         ]);
         $this->assertEquals("mock_subaccount_id", $subaccount_id);
 
 
-        $subaccount_id = $this->rave->saveSubAccount([
+        $subaccount_id = $this->rave->saveSubaccount([
             "subaccount_code" => 2115,
             "business_name" => "Test Business"
         ]);
         $this->assertNull($subaccount_id);
     }
 
-    public function testFetchSubAccount()
+    public function testFetchSubaccount()
     {
         $this->rave->setHttpClient(MockHttpClient::getHttpClient([
             MockRaveApiResponse::getSuccessfulFetchSubAccountResponse(),
             new Response(400)
         ]));
 
-        $subaccount = $this->rave->fetchSubAccount("mock_subaccount_id");
+        $subaccount = $this->rave->fetchSubaccount("mock_subaccount_id");
         $this->assertEquals("1234567890", $subaccount["account_number"]);
 
-        $subaccount = $this->rave->fetchSubAccount("mock_subaccount_id");
+        $subaccount = $this->rave->fetchSubaccount("mock_subaccount_id");
         $this->assertNull($subaccount);
     }
 
-    public function testFetchAllSubAccounts()
+    public function testFetchAllSubaccounts()
     {
         $this->rave->setHttpClient(MockHttpClient::getHttpClient([
             MockRaveApiResponse::getSuccessfulFetchAllSubAccountsResponse(),
             new Response(400)
         ]));
 
-        $subaccounts = $this->rave->fetchAllSubAccounts();
+        $subaccounts = $this->rave->fetchAllSubaccounts();
         $this->assertEquals(4, count($subaccounts));
 
-        $subaccounts = $this->rave->fetchAllSubAccounts();
+        $subaccounts = $this->rave->fetchAllSubaccounts();
         $this->assertNull($subaccounts);
     }
 
-    public function testDeleteSubAccount()
+    public function testDeleteSubaccount()
     {
         $this->rave->setHttpClient(MockHttpClient::getHttpClient([
             MockRaveApiResponse::getSuccessfulDeleteSubAccountResponse(),
             new Response(400)
         ]));
 
-        $result = $this->rave->deleteSubAccount("mock_subaccount_id");
+        $result = $this->rave->deleteSubaccount("mock_subaccount_id");
         $this->assertEquals("success", $result);
 
-        $result = $this->rave->deleteSubAccount("mock_subaccount_id");
+        $result = $this->rave->deleteSubaccount("mock_subaccount_id");
         $this->assertNull($result);
     }
 }

@@ -7,7 +7,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Uri;
-use Kofi\NgPayments\Exceptions\FailedTransactionException;
+use Kofi\NgPayments\Exceptions\FailedPaymentException;
 use Kofi\NgPayments\Exceptions\InvalidRequestBodyException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -52,7 +52,7 @@ abstract class AbstractPaymentProvider
     /**
      * @var bool
      */
-    protected $transactionExceptions = true;
+    protected $paymentExceptions = true;
 
     public function __construct($public_key, $secret_key, $app_env)
     {
@@ -80,7 +80,7 @@ abstract class AbstractPaymentProvider
      * @param string $reference
      * @param float $expected_naira_amount
      * @return boolean
-     * @throws FailedTransactionException if transactionExceptions are turned on
+     * @throws FailedPaymentException if paymentExceptions are enabled
      */
     abstract public function isPaymentValid($reference, $expected_naira_amount);
 
@@ -95,7 +95,7 @@ abstract class AbstractPaymentProvider
      * @param array $request_body
      * @return string|null transaction reference or null if the request failed
      * @throws InvalidRequestBodyException
-     * @throws FailedTransactionException if transactionExceptions are enabled
+     * @throws FailedPaymentException if paymentExceptions are enabled
      */
     abstract public function chargeAuth($request_body);
 
@@ -154,28 +154,28 @@ abstract class AbstractPaymentProvider
      * @throws InvalidRequestBodyException
      * @throws BadResponseException if httpExceptions are enabled
      */
-    abstract public function saveSubAccount($request_body);
+    abstract public function saveSubaccount($request_body);
 
     /**
      * @param array $query_params
      * @return array|null an array of subaccount assoc arrays or null if the request failed
      * @throws BadResponseException if httpExceptions are enabled
      */
-    abstract public function fetchAllSubAccounts($query_params = []);
+    abstract public function fetchAllSubaccounts($query_params = []);
 
     /**
      * @param $subaccount_id
      * @return array|null an assoc array containing the subaccount's data or null if the request failed
      * @throws BadResponseException if httpExceptions are enabled
      */
-    abstract public function fetchSubAccount($subaccount_id);
+    abstract public function fetchSubaccount($subaccount_id);
 
     /**
      * @param $subaccount_id
      * @return string|null a success message or null if the request failed
      * @throws BadResponseException if httpExceptions are enabled
      */
-    abstract public function deleteSubAccount($subaccount_id);
+    abstract public function deleteSubaccount($subaccount_id);
 
     /**
      * @param array $query_params
@@ -257,7 +257,7 @@ abstract class AbstractPaymentProvider
     public function setErrorConfig($error_config)
     {
         $this->httpExceptions = @$error_config["http_exceptions"] ?? false;
-        $this->transactionExceptions = @$error_config["transaction_exceptions"] ?? true;
+        $this->paymentExceptions = @$error_config["transaction_exceptions"] ?? true;
     }
 
     public function enableHttpExceptions()
@@ -265,9 +265,9 @@ abstract class AbstractPaymentProvider
         $this->httpExceptions = true;
     }
 
-    public function enableTransactionExceptions()
+    public function enablePaymentExceptions()
     {
-        $this->transactionExceptions = true;
+        $this->paymentExceptions = true;
     }
 
     public function disableHttpExceptions()
@@ -275,9 +275,9 @@ abstract class AbstractPaymentProvider
         $this->httpExceptions = false;
     }
 
-    public function disableTransactionExceptions()
+    public function disablePaymentExceptions()
     {
-        $this->transactionExceptions = false;
+        $this->paymentExceptions = false;
     }
 
     /**

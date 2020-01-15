@@ -3,17 +3,17 @@
 namespace Kofi\NgPayments\Tests\functional\Rave;
 
 use Kofi\NgPayments\PaymentProviders\PaymentProviderFactory;
-use Kofi\NgPayments\SubAccount;
+use Kofi\NgPayments\Subaccount;
 use PHPUnit\Framework\TestCase;
 
 /**
  * Rave does not provide test bank accounts for use in the creation of SubAccounts in their sandbox
  * so there's not much that can be tested here
  *
- * Class SubAccountTest
+ * Class SubaccountTest
  * @package Kofi\NgPayments\Tests\functional\Rave
  */
-class SubAccountTest extends TestCase
+class SubaccountTest extends TestCase
 {
     protected function setUp()
     {
@@ -22,7 +22,7 @@ class SubAccountTest extends TestCase
 
     public function testFetchBanks()
     {
-        $banks = SubAccount::fetchBanks();
+        $banks = Subaccount::fetchBanks();
         $this->assertNotNull($banks);
     }
 }

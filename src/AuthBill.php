@@ -17,7 +17,8 @@ class AuthBill extends Bill
 
     public function charge()
     {
-        return $this->paymentProvider->chargeAuth($this->attributes);
+        $this->paymentReference = $this->paymentProvider->chargeAuth($this->attributes);
+        return $this->paymentReference;
     }
 
 }

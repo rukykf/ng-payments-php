@@ -7,7 +7,7 @@ use GuzzleHttp\Exception\BadResponseException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
-class FailedTransactionException extends BadResponseException
+class FailedPaymentException extends BadResponseException
 {
     /**
      * @param RequestInterface $httpRequest
