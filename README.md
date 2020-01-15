@@ -1,7 +1,7 @@
 # NgPayments
 [![Build Status](https://travis-ci.com/rukykf/ng-payments-php.png?branch=master)](https://travis-ci.com/rukykf/ng-payments-php) [![Latest Stable Version](https://poser.pugx.org/kofi/ngpayments/v/stable)](https://packagist.org/packages/kofi/ngpayments)  [![License](https://poser.pugx.org/kofi/ngpayments/license)](https://packagist.org/packages/kofi/ngpayments)
 
-Simple integration with Nigerian payment gateways - Paystack and Rave (Flutterwave). This package simplifies and streamlines the process of building requests to these APIs  and retrieving their responses. 
+Simple integration with Nigerian payment gateways - Paystack and Rave (Flutterwave). This package simplifies the process of building requests to these APIs and retrieving their responses for processing.
 
 ## Installation & Configuration
 Install using Composer:
