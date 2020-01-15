@@ -33,6 +33,7 @@ define("RAVE_PUBLIC_KEY", "your rave public key");
 define("RAVE_PRIVATE_KEY", "your rave private key");
 ```
 **Caching configurations (relevant for Laravel users)**
+
 If you are using the Laravel Artisan config:cache command to cache your configurations in production, Laravel will not load your .env file so you'd need to configure the package in one of your service providers. 
 
 Firstly load the configurations from .env into Laravel's config by going to config/services.php and doing this
@@ -61,6 +62,7 @@ public function boot(){
 ```
 
 **Configuring Http Exceptions and Payment Exceptions**
+
 By default http exceptions are disabled for requests made by the package. But if you would like to deal with `BadResponseException` exceptions thrown by the Guzzle Http Client for 4xx and 5xx level http responses, you can enable http exceptions this way:
 
 ```php
@@ -207,6 +209,7 @@ $authorization_code = Bill::getPaymentAuthorizationCode($reference, 7000); //Thi
 ```
 
 **3) Create an AuthBill and charge the customer anytime you need to**
+
 Note that the authorization_code you get from your provider is only valid for the specified customer's email. 
 
 ```php
@@ -291,6 +294,7 @@ So when you save a subaccount or plan, you'll be getting the alphanumeric code w
 
 ## Integrating with Rave
 **Creating Subaccounts with Rave**
+
 The Subaccount class that ships with this package has 4 default arguments in its constructor
 
 ```php
