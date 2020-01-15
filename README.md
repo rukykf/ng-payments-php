@@ -39,9 +39,9 @@ Firstly load the configurations from .env into Laravel's config by going to conf
 
 ```php
 'paystack' => [
- 'public_key' => env('PAYSTACK_PUBLIC_KEY'), 
- 'private_key' => env('PAYSTACK_PRIVATE_KEY')
-];
+   'public_key' => env('PAYSTACK_PUBLIC_KEY'), 
+   'private_key' => env('PAYSTACK_PRIVATE_KEY')
+ ];
 ```
 Then in your AppServiceProvider's boot() method ( you could place this in any other service provider) do this:
 
@@ -296,14 +296,14 @@ The Subaccount class that ships with this package has 4 default arguments in its
 ```php
 class Subaccount implements ApiDataMapperInterface
 {
-...
-public function __construct(
+   ...
+   public function __construct(
       $business_name = null,
       string $settlement_bank = null,
       string $account_number = null,
       $percentage_charge = null
-){...}
-...
+   ){...}
+   ...
 ```
 
 In the documentation for Rave's [Create Subaccount](https://developer.flutterwave.com/v2.0/reference#create-subaccount) endpoint you will find that Rave requires you to set more parameters than this. The package helps you set the `split_type` to `percentage` and the `country` to `NG`.  The `$percentage_charge` in the constructor is used to set the `split_value` required by Rave. This is fine if you want to work with percentage splits. 
