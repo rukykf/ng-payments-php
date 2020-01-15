@@ -304,12 +304,7 @@ In the documentation for Rave's [Create Subaccount](https://developer.flutterwav
 To create a Subaccount with Rave you would still need to set the `business_mobile` and the `business_email` yourself, in order to successfully create a subaccount when you call the `$subaccount->save()` method.  So to create a subaccount with Rave you would do this:
 
 ```php
-$subaccount = new Subaccount(
-	     "Business Name", 
-	      $settlement_bank, 
-	      $merchant_account_number, 	
-	      $percentage_charge
-	   );
+$subaccount = new Subaccount("Business Name", $settlement_bank, $merchant_account_number, $percentage_charge);
 $subaccount->business_mobile = $business_mobile;
 $subaccount->business_email = $business_email;
 $subaccount_id = $subaccount->save(); 
