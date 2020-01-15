@@ -25,6 +25,10 @@ class Bill
         }
     }
 
+    /**
+     * @return $this
+     * @throws Exceptions\InvalidRequestBodyException
+     */
     public function charge()
     {
         $this->paymentReference = $this->paymentProvider->initializePayment($this->attributes);
@@ -44,11 +48,25 @@ class Bill
         return $this->charge();
     }
 
+    /**
+     * @param $payment_reference
+     * @param $naira_amount
+     * @return bool
+     * @throws Exceptions\InvalidPaymentProviderConfigException
+     * @throws Exceptions\FailedPaymentException if paymentExceptions are enabled
+     */
     public static function isPaymentValid($payment_reference, $naira_amount)
     {
         return PaymentProviderFactory::getPaymentProvider()->isPaymentValid($payment_reference, $naira_amount);
     }
 
+    /**
+     * @param $payment_reference
+     * @param $naira_amount
+     * @return string|null authorization_code or null if the request failed
+     * @throws Exceptions\InvalidPaymentProviderConfigException
+     * @throws Exceptions\FailedPaymentException if paymentExceptions are enabled
+     */
     public static function getPaymentAuthorizationCode($payment_reference, $naira_amount)
     {
         $payment_provider = PaymentProviderFactory::getPaymentProvider();

@@ -3,6 +3,8 @@
 
 namespace Kofi\NgPayments;
 
+use Kofi\NgPayments\Exceptions\FailedPaymentException;
+
 class AuthBill extends Bill
 {
     public function __construct($authorization_code = null, $customer_email = null, $naira_amount = null)
@@ -15,6 +17,11 @@ class AuthBill extends Bill
         }
     }
 
+    /**
+     * @return string|null payment reference or null if the request failed
+     * @throws Exceptions\InvalidRequestBodyException
+     * @throws Exceptions\FailedPaymentException if PaymentExceptions are enabled
+     */
     public function charge()
     {
         $this->paymentReference = $this->paymentProvider->chargeAuth($this->attributes);
