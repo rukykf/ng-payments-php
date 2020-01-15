@@ -248,7 +248,7 @@ $reference = $bill->splitCharge($subaccount_id)->getPaymentReference();
 $payment_page_url = $bill->getPaymentPageUrl();
 ```
 
-You could also split Authorization code payments with subaccounts
+You could also split `AuthBill` payments with subaccounts
 
 ```php
 $subaccount_id = retrieveSubaccountIdFromDatabase()
