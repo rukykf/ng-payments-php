@@ -90,7 +90,7 @@ header("Location: " . $payment_page_url);   			//redirect to Paystack's checkout
 $bill = new Bill();
 $bill->setCustomerEmail("customer@email.com")
      ->setReference("reference")
-     ->setAmount("40000")
+     ->setAmount(40000)
      ->setCallbackUrl($callback_url);
 $payment_page_url = $bill->charge()->getPaymentPageUrl()
 header("Location: ". $payment_page_url);
@@ -137,7 +137,7 @@ header("Location: ". $payment_page_url);
 $bill_data = [
     "customer_email" => "customer@email.com",
     "reference" => "unique_reference",
-    "amount" => "4000",
+    "amount" => 4000,
     "callback_url" => $callback_url
 ];
 $bill = new Bill($bill_data);
