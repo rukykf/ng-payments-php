@@ -3,7 +3,9 @@
 
 Simple integration with Nigerian payment gateways - Paystack and Rave (Flutterwave). This package simplifies the process of building requests to these APIs and retrieving their responses for processing.
 
-## Installation & Configuration
+## Requirements, Installation & Configuration
+This package requires at least php7.1
+
 Install using Composer:
 
     composer require kofi/ngpayments
