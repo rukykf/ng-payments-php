@@ -34,7 +34,7 @@ define("RAVE_PRIVATE_KEY", "your rave private key");
 ```
 **Caching configurations (relevant for Laravel users)**
 
-If you are using the Laravel `artisan config:cache` command to cache your configurations in production, Laravel will not load your .env file so you'd need to configure the package in one of your service providers. 
+If you are using the Laravel `artisan config:cache` command to cache your configurations in production, the package will not have access to the variables from your .env file so you'd need to configure the package in one of your service providers. 
 
 Firstly load the configurations from .env into Laravel's config by going to config/services.php and doing this
 
