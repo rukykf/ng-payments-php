@@ -279,7 +279,7 @@ $plan_id = $plan->save();
 
 ```php
 $bill = new Bill($customer_email, 3000);            //the plan amount will always override the bill amount in this case
-$reference = $bill->subscribe($bill)->getPaymentReference(); 
+$reference = $bill->subscribe($plan_id)->getPaymentReference(); 
 $payment_page_url = $bill->getPaymentPageUrl();   
 header("Location: " . $payment_page_url);          //redirect to the payment page
 ```
