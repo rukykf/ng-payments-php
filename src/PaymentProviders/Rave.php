@@ -28,7 +28,7 @@ class Rave extends AbstractPaymentProvider
     {
         $relative_url = "/flwv3-pug/getpaidx/api/v2/hosted/pay";
         $request_body = $this->adaptBodyParamsToRaveAPI($request_body, ['plan_code' => 'payment_plan']);
-        $request_body = $this->processSubAccountsForRaveTransactionEndpoint($request_body);
+        $request_body = $this->processSubaccountsForRaveTransactionEndpoint($request_body);
         $request_body = $this->addRaveTransactionDefaults($request_body);
         $request_body['PBFPubKey'] = $this->publicKey;
         $request = $this->createRequestForRave($relative_url, $request_body);
@@ -87,7 +87,7 @@ class Rave extends AbstractPaymentProvider
             ["customer_email" => "email", "plan_code" => "payment_plan"]
         );
         $request_body = $this->addRaveTransactionDefaults($request_body);
-        $request_body = $this->processSubAccountsForRaveTransactionEndpoint($request_body);
+        $request_body = $this->processSubaccountsForRaveTransactionEndpoint($request_body);
 
         //Rave is not very consistent with its parameter spellings across endpoints
         //this is a quirk I noticed for this endpoint
@@ -333,8 +333,8 @@ class Rave extends AbstractPaymentProvider
     private function createSubaccount($request_body)
     {
         $relative_url = "/v2/gpx/subaccounts/create";
-        $request_body = $this->adaptBodyParamsToRaveAPI($request_body, $this->getRaveCreateSubAccountParams());
-        $request_body = $this->addRaveCreateSubAccountDefaults($request_body);
+        $request_body = $this->adaptBodyParamsToRaveAPI($request_body, $this->getRaveCreateSubaccountParams());
+        $request_body = $this->addRaveCreateSubaccountDefaults($request_body);
         $request = $this->createRequestForRave($relative_url, $request_body);
         $this->validateRequestBodyHasRequiredParams(
             $request_body,
@@ -430,7 +430,7 @@ class Rave extends AbstractPaymentProvider
      * @param array $request_body
      * @return array
      */
-    private function addRaveCreateSubAccountDefaults(array $request_body)
+    private function addRaveCreateSubaccountDefaults(array $request_body)
     {
         if (!isset($request_body['split_type'])) {
             $request_body['split_type'] = 'percentage';
@@ -468,7 +468,7 @@ class Rave extends AbstractPaymentProvider
     /**
      * @return array
      */
-    private function getRaveCreateSubAccountParams()
+    private function getRaveCreateSubaccountParams()
     {
         return [
             "settlement_bank" => "account_bank",
@@ -480,7 +480,7 @@ class Rave extends AbstractPaymentProvider
      * @param $request_body
      * @return mixed
      */
-    private function processSubAccountsForRaveTransactionEndpoint($request_body)
+    private function processSubaccountsForRaveTransactionEndpoint($request_body)
     {
         if (isset($request_body['subaccount_code'])) {
             $request_body['subaccounts'] = [
